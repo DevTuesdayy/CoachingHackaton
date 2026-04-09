@@ -8,11 +8,11 @@
 import SwiftUI
 
 struct SubscriptionView: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+
     var body: some View {
         ZStack {
-            // Fondo oscuro consistente
-            Color(red: 0.02, green: 0.05, blue: 0.12)
-                .ignoresSafeArea()
+            AppBackgroundView()
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 30) {
@@ -22,15 +22,15 @@ struct SubscriptionView: View {
                         Button(action: { /* Acción volver */ }) {
                             Image(systemName: "chevron.left")
                                 .font(.title3)
-                                .foregroundColor(.white)
+                                .foregroundColor(themeManager.primaryTextColor)
                                 .padding(12)
-                                .background(Color.white.opacity(0.1))
+                                .background(themeManager.elevatedCardColor)
                                 .clipShape(Circle())
                         }
                         Spacer()
                         Text("Planes")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundColor(themeManager.primaryTextColor)
                         Spacer()
                         // Espaciador para centrar el título
                         Color.clear.frame(width: 44, height: 44)
@@ -41,14 +41,14 @@ struct SubscriptionView: View {
                     VStack(spacing: 8) {
                         Text("Desbloquea tu")
                             .font(.system(size: 32, weight: .bold))
-                            .foregroundColor(.white)
+                            .foregroundColor(themeManager.primaryTextColor)
                         Text("potencial real")
                             .font(.system(size: 32, weight: .bold))
-                            .foregroundColor(.cyan)
+                            .foregroundColor(themeManager.accentColor)
                         
                         Text("Práctica ilimitada con feedback inteligente.")
                             .font(.subheadline)
-                            .foregroundColor(.gray)
+                            .foregroundColor(themeManager.secondaryTextColor)
                             .padding(.top, 5)
                     }
                     .multilineTextAlignment(.center)
@@ -80,10 +80,10 @@ struct SubscriptionView: View {
                             .font(.system(size: 10, weight: .bold))
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .background(Color.cyan)
+                            .background(themeManager.accentColor)
                             .foregroundColor(.black)
                             .cornerRadius(10)
-                            .shadow(color: .cyan.opacity(0.5), radius: 10)
+                            .shadow(color: themeManager.accentColor.opacity(0.5), radius: 10)
                             .offset(x: -20, y: -10)
                     }
                     
@@ -107,6 +107,8 @@ struct SubscriptionView: View {
 
 // MARK: - Componente PlanCard
 struct PlanCard: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+
     let title: String
     let price: String
     let subtitle: String
@@ -126,18 +128,18 @@ struct PlanCard: View {
                             .bold()
                         if isPro {
                             Image(systemName: "star.fill")
-                                .foregroundColor(.cyan)
+                                .foregroundColor(themeManager.accentColor)
                                 .font(.caption)
                         }
                         if let iconName = icon {
                             Image(systemName: iconName)
                                 .font(.caption)
-                                .foregroundColor(.gray)
+                                .foregroundColor(themeManager.secondaryTextColor)
                         }
                     }
                     Text(subtitle)
                         .font(.subheadline)
-                        .foregroundColor(.gray)
+                        .foregroundColor(themeManager.secondaryTextColor)
                 }
                 
                 Spacer()
@@ -148,7 +150,7 @@ struct PlanCard: View {
                             .font(.system(size: 32, weight: .bold))
                         Text(priceDetail)
                             .font(.caption2)
-                            .foregroundColor(.gray)
+                            .foregroundColor(themeManager.secondaryTextColor)
                     }
                 }
             }
@@ -158,11 +160,11 @@ struct PlanCard: View {
                     ForEach(features, id: \.self) { feature in
                         HStack(spacing: 10) {
                             Image(systemName: isPro ? "bolt.fill" : "checkmark.circle")
-                                .foregroundColor(isPro ? .cyan : .gray)
+                                .foregroundColor(isPro ? themeManager.accentColor : themeManager.secondaryTextColor)
                                 .font(.system(size: 14))
                             Text(feature)
                                 .font(.system(size: 14))
-                                .foregroundColor(.white.opacity(0.9))
+                                .foregroundColor(themeManager.primaryTextColor.opacity(0.9))
                         }
                     }
                 }
@@ -173,19 +175,28 @@ struct PlanCard: View {
                     .fontWeight(.bold)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 15)
-                    .background(isPro ? AnyView(LinearGradient(colors: [.blue, .cyan], startPoint: .leading, endPoint: .trailing)) : AnyView(Color.white.opacity(0.1)))
-                    .foregroundColor(isPro ? .white : .gray)
+                    .background(isPro ? AnyView(themeManager.accentGradient) : AnyView(themeManager.elevatedCardColor))
+                    .foregroundColor(isPro ? .white : themeManager.secondaryTextColor)
                     .cornerRadius(15)
             }
         }
         .padding(25)
         .background(
             ZStack {
-                Color.white.opacity(0.05)
+                themeManager.cardColor
                 if isPro {
-                    // Efecto de brillo para el plan Pro
                     RoundedRectangle(cornerRadius: 30)
-                        .stroke(LinearGradient(colors: [.cyan.opacity(0.6), .blue.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 2)
+                        .stroke(
+                            LinearGradient(
+                                colors: [
+                                    themeManager.accentColor.opacity(0.6),
+                                    themeManager.accentSecondaryColor.opacity(0.2)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 2
+                        )
                 }
             }
         )
@@ -198,5 +209,6 @@ struct PlanCard: View {
 struct SubscriptionView_Previews: PreviewProvider {
     static var previews: some View {
         SubscriptionView()
+            .environmentObject(ThemeManager())
     }
 }

@@ -9,10 +9,12 @@
 import SwiftUI
 
 struct TabItem: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+
     var icon: String
     var label: String
     var active: Bool = false
-    
+
     var body: some View {
         VStack(spacing: 5) {
             Image(systemName: icon)
@@ -21,13 +23,14 @@ struct TabItem: View {
             Text(label)
                 .font(.system(size: 11))
         }
-        .foregroundColor(active ? .cyan : .gray)
+        .foregroundColor(active ? themeManager.accentColor : themeManager.iconMutedColor)
     }
 }
 
 #Preview {
     ZStack {
-        Color.black.ignoresSafeArea()
+        AppBackgroundView()
         TabItem(icon: "house.fill", label: "Inicio", active: true)
     }
+    .environmentObject(ThemeManager())
 }

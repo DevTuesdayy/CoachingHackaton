@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct ScoreLineChartView: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+
     let values: [CGFloat]
     let labels: [String]
-    let isDarkMode: Bool
-    
+
     var body: some View {
         GeometryReader { geometry in
             let width = geometry.size.width
@@ -25,7 +26,7 @@ struct ScoreLineChartView: View {
                     ForEach(0..<5, id: \.self) { _ in
                         Spacer()
                         Rectangle()
-                            .fill((isDarkMode ? Color.white : Color.black).opacity(0.08))
+                            .fill(themeManager.borderColor)
                             .frame(height: 1)
                     }
                 }
@@ -43,7 +44,7 @@ struct ScoreLineChartView: View {
                         }
                     }
                 }
-                .stroke(Color.cyan, style: StrokeStyle(lineWidth: 4, lineCap: .round, lineJoin: .round))
+                .stroke(themeManager.accentColor, style: StrokeStyle(lineWidth: 4, lineCap: .round, lineJoin: .round))
                 
                 ForEach(values.indices, id: \.self) { index in
                     let x = width * CGFloat(index) / CGFloat(max(values.count - 1, 1))
@@ -51,11 +52,11 @@ struct ScoreLineChartView: View {
                     let y = height - (normalizedY * (height - 40)) - 20
                     
                     Circle()
-                        .fill(isDarkMode ? Color(red: 0.01, green: 0.05, blue: 0.14) : .white)
+                        .fill(themeManager.backgroundColor)
                         .frame(width: 16, height: 16)
                         .overlay(
                             Circle()
-                                .stroke(Color.cyan, lineWidth: 3)
+                                .stroke(themeManager.accentColor, lineWidth: 3)
                         )
                         .position(x: x, y: y)
                 }
@@ -66,7 +67,7 @@ struct ScoreLineChartView: View {
                         ForEach(labels, id: \.self) { label in
                             Text(label)
                                 .font(.system(size: 11, weight: .medium))
-                                .foregroundColor(.gray)
+                                .foregroundColor(themeManager.secondaryTextColor)
                                 .frame(maxWidth: .infinity)
                         }
                     }

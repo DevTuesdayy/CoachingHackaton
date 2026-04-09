@@ -8,24 +8,25 @@
 import SwiftUI
 
 struct TimelineRowView: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+
     let time: String
     let title: String
-    let isDarkMode: Bool
-    
+
     var body: some View {
         HStack(spacing: 14) {
             Text(time)
                 .font(.system(size: 16, weight: .medium, design: .monospaced))
-                .foregroundColor(.gray)
+                .foregroundColor(themeManager.secondaryTextColor)
                 .frame(width: 54, alignment: .leading)
             
             Circle()
-                .fill(Color.cyan)
+                .fill(themeManager.accentColor)
                 .frame(width: 14, height: 14)
             
             Text(title)
                 .font(.system(size: 18, weight: .medium))
-                .foregroundColor(isDarkMode ? .white : .black)
+                .foregroundColor(themeManager.primaryTextColor)
             
             Spacer()
         }

@@ -9,32 +9,18 @@ import SwiftData
 import SwiftUI
 
 struct MainDashboardView: View {
+    @EnvironmentObject private var themeManager: ThemeManager
 
     @StateObject private var entrenadorVoz = EntrenadorDeVoz()
-    @State private var isDarkMode = true
     @State private var mostrarPracticaEnVivo = false
     @State private var selectedTab: DashboardTab = .home
 
     @Environment(\.modelContext) private var context
     @StateObject private var viewModel = MainDashboardViewModel()
 
-    private var backgroundColor: Color {
-        isDarkMode
-            ? Color(red: 0.02, green: 0.05, blue: 0.12)
-            : Color(white: 0.95)
-    }
-
-    private var cardColor: Color {
-        isDarkMode ? Color.white.opacity(0.05) : Color.white
-    }
-
-    private var textColor: Color {
-        isDarkMode ? .white : .black
-    }
-
     var body: some View {
         ZStack {
-            backgroundColor
+            themeManager.backgroundColor
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
@@ -69,86 +55,69 @@ extension MainDashboardView {
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 55, height: 55)
-                    .foregroundColor(.gray)
+                    .foregroundColor(themeManager.iconMutedColor)
                     .clipShape(Circle())
                     .overlay(
-                        Circle().stroke(Color.cyan, lineWidth: 2)
+                        Circle().stroke(themeManager.accentColor, lineWidth: 2)
                     )
 
                 Circle()
-                    .fill(Color.green)
+                    .fill(themeManager.successColor)
                     .frame(width: 14, height: 14)
                     .overlay(
-                        Circle().stroke(backgroundColor, lineWidth: 2)
+                        Circle().stroke(themeManager.backgroundColor, lineWidth: 2)
                     )
             }
 
             VStack(alignment: .leading, spacing: 2) {
                 Text("Hola, \(viewModel.username)")
                     .font(.system(size: 22, weight: .bold))
-                    .foregroundColor(textColor)
+                    .foregroundColor(themeManager.primaryTextColor)
 
                 Text("Plan Pro • Activo")
                     .font(.system(size: 14))
-                    .foregroundColor(.cyan)
+                    .foregroundColor(themeManager.accentColor)
             }
 
             Spacer()
-
-            Button {
-                withAnimation(.easeInOut) {
-                    isDarkMode.toggle()
-                }
-            } label: {
-                Image(systemName: isDarkMode ? "sun.max.fill" : "moon.fill")
-                    .font(.system(size: 18))
-                    .foregroundColor(isDarkMode ? .yellow : .blue)
-                    .padding(12)
-                    .background(cardColor)
-                    .clipShape(Circle())
-                    .shadow(
-                        color: Color.black.opacity(isDarkMode ? 0 : 0.1),
-                        radius: 5
-                    )
-            }
         }
         .padding(.horizontal)
         .padding(.top, 10)
     }
- 
+
     private var practiceCardSection: some View {
         VStack(spacing: 15) {
             ZStack {
                 Circle()
-                    .fill(Color.cyan.opacity(0.1))
+                    .fill(themeManager.accentColor.opacity(0.1))
                     .frame(width: 70, height: 70)
 
                 Image(systemName: "mic.fill")
                     .font(.system(size: 30))
-                    .foregroundColor(.cyan)
+                    .foregroundColor(themeManager.accentColor)
             }
 
             Text("Iniciar Práctica")
                 .font(.title3)
                 .bold()
-                .foregroundColor(textColor)
+                .foregroundColor(themeManager.primaryTextColor)
 
             Text("IA lista para analizar tu pitch")
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundColor(themeManager.secondaryTextColor)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 35)
         .background(
             RoundedRectangle(cornerRadius: 30)
-                .fill(Color.blue.opacity(0.05))
+                .fill(themeManager.accentSecondaryColor.opacity(0.05))
                 .overlay(
                     RoundedRectangle(cornerRadius: 30)
                         .stroke(
                             LinearGradient(
                                 colors: [
-                                    .cyan.opacity(0.8),
-                                    .blue.opacity(0.2),
+                                    themeManager.accentColor.opacity(0.8),
+                                    themeManager.accentSecondaryColor.opacity(0.2),
                                 ],
                                 startPoint: .topLeading,
                                 endPoint: .bottomTrailing
@@ -170,7 +139,7 @@ extension MainDashboardView {
                 value: "85",
                 label: "SCORE PROMEDIO",
                 unit: "/100",
-                valueColor: Color(red: 0.2, green: 0.9, blue: 0.5)
+                valueColor: themeManager.successColor
             )
         }
         .padding(.horizontal)
@@ -181,13 +150,13 @@ extension MainDashboardView {
             HStack {
                 Text("Progreso Semanal")
                     .font(.headline)
-                    .foregroundColor(textColor)
+                    .foregroundColor(themeManager.primaryTextColor)
 
                 Spacer()
 
-                Button("Ver todo >") {}
+                Button("Ver todo >") { }
                     .font(.system(size: 14))
-                    .foregroundColor(.cyan)
+                    .foregroundColor(themeManager.accentColor)
             }
             .padding(.horizontal)
 
@@ -199,42 +168,43 @@ extension MainDashboardView {
                             .frame(width: 38, height: 38)
 
                         Image(systemName: "bolt.fill")
-                            .foregroundColor(.purple)
+                            .foregroundColor(themeManager.accentSecondaryColor)
                     }
 
                     VStack(alignment: .leading) {
                         Text("Fluidez verbal")
-                            .foregroundColor(textColor)
+                            .foregroundColor(themeManager.primaryTextColor)
                             .fontWeight(.semibold)
 
                         Text("Has reducido tus muletillas un 15%")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundColor(themeManager.secondaryTextColor)
                     }
 
                     Spacer()
 
                     Image(systemName: "chart.line.uptrend.xyaxis")
-                        .foregroundColor(.green)
+                        .foregroundColor(themeManager.successColor)
                         .padding(8)
-                        .background(Color.green.opacity(0.1))
+                        .background(themeManager.successColor.opacity(0.1))
                         .clipShape(Circle())
                 }
 
                 BarChartView()
             }
             .padding(20)
-            .background(Color.white.opacity(0.05))
+            .background(themeManager.cardColor)
             .cornerRadius(25)
             .padding(.horizontal)
         }
     }
 
     private var bottomTabBar: some View {
-        FloatingTabBar(selectedTab: $selectedTab, isDarkMode: isDarkMode)
+        FloatingTabBar(selectedTab: $selectedTab)
     }
 }
 
 #Preview {
     MainDashboardView()
+        .environmentObject(ThemeManager())
 }

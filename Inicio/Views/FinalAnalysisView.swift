@@ -9,13 +9,13 @@ import SwiftUI
 
 struct FinalAnalysisView: View {
     @Environment(\.dismiss) private var dismiss
-    
+    @EnvironmentObject private var themeManager: ThemeManager
+
     @State private var selectedTab: AnalysisSection = .timeline
-    @State private var isDarkMode = true
-    
+
     let score: Int = 82
     let levelText: String = "EXCELENTE"
-    
+
     var body: some View {
         ZStack {
             backgroundView
@@ -51,12 +51,12 @@ extension FinalAnalysisView {
     
     private var backgroundView: some View {
         ZStack {
-            (isDarkMode ? Color(red: 0.01, green: 0.05, blue: 0.14) : Color(red: 0.94, green: 0.97, blue: 1.0))
+            themeManager.backgroundColor
                 .ignoresSafeArea()
             
             RadialGradient(
                 colors: [
-                    Color.cyan.opacity(isDarkMode ? 0.10 : 0.18),
+                    themeManager.accentColor.opacity(themeManager.isDarkMode ? 0.10 : 0.18),
                     .clear
                 ],
                 center: .top,
@@ -93,8 +93,7 @@ extension FinalAnalysisView {
     private var scoreSection: some View {
         CircularScoreView(
             score: score,
-            label: levelText,
-            isDarkMode: isDarkMode
+            label: levelText
         )
         .frame(height: 270)
     }
@@ -123,12 +122,12 @@ extension FinalAnalysisView {
         } label: {
             Text(title)
                 .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(isSelected ? .cyan : secondaryTextColor)
+                .foregroundColor(isSelected ? themeManager.accentColor : secondaryTextColor)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(isSelected ? Color.cyan.opacity(isDarkMode ? 0.18 : 0.12) : .clear)
+                        .fill(isSelected ? themeManager.accentColor.opacity(themeManager.isDarkMode ? 0.18 : 0.12) : .clear)
                 )
         }
         .buttonStyle(.plain)
@@ -138,7 +137,7 @@ extension FinalAnalysisView {
         VStack(alignment: .leading, spacing: 22) {
             HStack(spacing: 12) {
                 Image(systemName: "chart.bar.fill")
-                    .foregroundColor(.cyan)
+                    .foregroundColor(themeManager.accentColor)
                     .font(.system(size: 20))
                 
                 Text("Fluctuación del Score")
@@ -148,14 +147,13 @@ extension FinalAnalysisView {
             
             ScoreLineChartView(
                 values: [56, 72, 65, 48, 76, 79],
-                labels: ["0:00", "0:30", "1:00", "1:30", "2:00", "2:30"],
-                isDarkMode: isDarkMode
+                labels: ["0:00", "0:30", "1:00", "1:30", "2:00", "2:30"]
             )
             .frame(height: 220)
             
             VStack(spacing: 14) {
-                TimelineRowView(time: "0:00", title: "Inicio", isDarkMode: isDarkMode)
-                TimelineRowView(time: "1:00", title: "Contacto visual", isDarkMode: isDarkMode)
+                TimelineRowView(time: "0:00", title: "Inicio")
+                TimelineRowView(time: "1:00", title: "Contacto visual")
             }
         }
         .padding(22)
@@ -175,20 +173,17 @@ extension FinalAnalysisView {
             
             InsightBulletView(
                 title: "Buen cierre",
-                description: "Terminaste con seguridad y mantuviste un ritmo estable al final.",
-                isDarkMode: isDarkMode
+                description: "Terminaste con seguridad y mantuviste un ritmo estable al final."
             )
             
             InsightBulletView(
                 title: "Mejora el contacto visual",
-                description: "Hubo una caída cerca del minuto 1:30. Mantén la mirada al frente más tiempo.",
-                isDarkMode: isDarkMode
+                description: "Hubo una caída cerca del minuto 1:30. Mantén la mirada al frente más tiempo."
             )
             
             InsightBulletView(
                 title: "Fluidez sólida",
-                description: "Tu discurso fue claro y con pocas muletillas en la segunda mitad.",
-                isDarkMode: isDarkMode
+                description: "Tu discurso fue claro y con pocas muletillas en la segunda mitad."
             )
         }
         .padding(22)
@@ -214,18 +209,9 @@ extension FinalAnalysisView {
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 22)
-            .background(
-                LinearGradient(
-                    colors: [
-                        Color.cyan.opacity(0.85),
-                        Color.blue
-                    ],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            )
+            .background(themeManager.accentGradient)
             .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .shadow(color: Color.cyan.opacity(0.22), radius: 18, y: 8)
+            .shadow(color: themeManager.accentColor.opacity(0.22), radius: 18, y: 8)
         }
         .buttonStyle(.plain)
     }
@@ -238,17 +224,15 @@ extension FinalAnalysisView {
                 Spacer()
                 
                 Button {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        isDarkMode.toggle()
-                    }
+                    themeManager.toggleTheme()
                 } label: {
-                    Image(systemName: isDarkMode ? "sun.max" : "moon.fill")
+                    Image(systemName: themeManager.isDarkMode ? "sun.max" : "moon.fill")
                         .font(.system(size: 22, weight: .medium))
-                        .foregroundColor(isDarkMode ? .white.opacity(0.9) : .blue)
+                        .foregroundColor(themeManager.isDarkMode ? themeManager.primaryTextColor.opacity(0.9) : themeManager.accentSecondaryColor)
                         .frame(width: 76, height: 76)
                         .background(
                             Circle()
-                                .fill(isDarkMode ? Color.white.opacity(0.10) : Color.white.opacity(0.8))
+                                .fill(themeManager.elevatedCardColor)
                         )
                         .overlay(
                             Circle()
@@ -263,19 +247,19 @@ extension FinalAnalysisView {
     }
     
     private var cardBackground: Color {
-        isDarkMode ? Color.white.opacity(0.05) : Color.white.opacity(0.88)
+        themeManager.cardColor
     }
     
     private var borderColor: Color {
-        isDarkMode ? Color.white.opacity(0.08) : Color.black.opacity(0.06)
+        themeManager.borderColor
     }
     
     private var primaryTextColor: Color {
-        isDarkMode ? .white : .black
+        themeManager.primaryTextColor
     }
     
     private var secondaryTextColor: Color {
-        isDarkMode ? .gray.opacity(0.9) : .gray
+        themeManager.secondaryTextColor
     }
 }
 
@@ -286,4 +270,5 @@ enum AnalysisSection {
 
 #Preview {
     FinalAnalysisView()
+        .environmentObject(ThemeManager())
 }
