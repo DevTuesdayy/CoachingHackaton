@@ -9,10 +9,10 @@ import SwiftUI
 
 struct FinalAnalysisView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var themeManager: ThemeManager
     @StateObject private var generadorReportes = GeneradorReportes()
 
     @State private var selectedTab: AnalysisSection = .timeline
-    @State private var isDarkMode = true
 
     let contactoVisual: Int
     let muletillas: Int
@@ -35,25 +35,25 @@ struct FinalAnalysisView: View {
             "CRITICO"
         }
     }
-    
+
     var body: some View {
         ZStack {
             backgroundView
-            
+
             VStack(spacing: 0) {
                 headerSection
-                
+
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 22) {
                         scoreSection
                         segmentedSection
-                        
+
                         if selectedTab == .timeline {
                             timelineCard
                         } else {
                             insightsCard
                         }
-                        
+
                         retryButton
                     }
                     .padding(.horizontal, 22)
@@ -61,7 +61,7 @@ struct FinalAnalysisView: View {
                     .padding(.bottom, 30)
                 }
             }
-            
+
             floatingThemeButton
         }
         .task {
@@ -77,15 +77,14 @@ struct FinalAnalysisView: View {
 }
 
 extension FinalAnalysisView {
-    
     private var backgroundView: some View {
         ZStack {
-            (isDarkMode ? Color(red: 0.01, green: 0.05, blue: 0.14) : Color(red: 0.94, green: 0.97, blue: 1.0))
+            themeManager.backgroundColor
                 .ignoresSafeArea()
-            
+
             RadialGradient(
                 colors: [
-                    Color.cyan.opacity(isDarkMode ? 0.10 : 0.18),
+                    themeManager.accentColor.opacity(themeManager.isDarkMode ? 0.10 : 0.18),
                     .clear
                 ],
                 center: .top,
@@ -95,21 +94,21 @@ extension FinalAnalysisView {
             .ignoresSafeArea()
         }
     }
-    
+
     private var headerSection: some View {
         HStack {
             CircleIconButton(systemName: "chevron.left") {
                 dismiss()
             }
-            
+
             Spacer()
-            
+
             Text("Análisis Final")
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(primaryTextColor)
-            
+
             Spacer()
-            
+
             CircleIconButton(systemName: "square.and.arrow.up") {
                 // compartir
             }
@@ -118,16 +117,15 @@ extension FinalAnalysisView {
         .padding(.top, 20)
         .padding(.bottom, 10)
     }
-    
+
     private var scoreSection: some View {
         CircularScoreView(
             score: score,
-            label: levelText,
-            isDarkMode: isDarkMode
+            label: levelText
         )
         .frame(height: 270)
     }
-    
+
     private var segmentedSection: some View {
         HStack(spacing: 0) {
             segmentButton(title: "Análisis de IA", section: .insights)
@@ -141,10 +139,10 @@ extension FinalAnalysisView {
                 .stroke(borderColor, lineWidth: 1)
         )
     }
-    
+
     private func segmentButton(title: String, section: AnalysisSection) -> some View {
         let isSelected = selectedTab == section
-        
+
         return Button {
             withAnimation(.easeInOut(duration: 0.2)) {
                 selectedTab = section
@@ -152,42 +150,40 @@ extension FinalAnalysisView {
         } label: {
             Text(title)
                 .font(.system(size: 15, weight: .semibold))
-                .foregroundColor(isSelected ? .cyan : secondaryTextColor)
+                .foregroundColor(isSelected ? themeManager.accentColor : secondaryTextColor)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 16)
                 .background(
                     RoundedRectangle(cornerRadius: 18, style: .continuous)
-                        .fill(isSelected ? Color.cyan.opacity(isDarkMode ? 0.18 : 0.12) : .clear)
+                        .fill(isSelected ? themeManager.accentColor.opacity(themeManager.isDarkMode ? 0.18 : 0.12) : .clear)
                 )
         }
         .buttonStyle(.plain)
     }
-    
+
     private var timelineCard: some View {
         VStack(alignment: .leading, spacing: 22) {
             HStack(spacing: 12) {
                 Image(systemName: "chart.bar.fill")
-                    .foregroundColor(.cyan)
+                    .foregroundColor(themeManager.accentColor)
                     .font(.system(size: 20))
-                
+
                 Text("Fluctuación del Score")
                     .font(.system(size: 19, weight: .bold))
                     .foregroundColor(primaryTextColor)
             }
-            
+
             ScoreLineChartView(
                 values: timelineValues,
-                labels: timelineLabels,
-                isDarkMode: isDarkMode
+                labels: timelineLabels
             )
             .frame(height: 220)
-            
+
             VStack(spacing: 14) {
                 ForEach(timelineEvents, id: \.time) { event in
                     TimelineRowView(
                         time: event.time,
-                        title: event.title,
-                        isDarkMode: isDarkMode
+                        title: event.title
                     )
                 }
             }
@@ -200,7 +196,7 @@ extension FinalAnalysisView {
                 .stroke(borderColor, lineWidth: 1)
         )
     }
-    
+
     private var insightsCard: some View {
         VStack(alignment: .leading, spacing: 18) {
             Text("Insights de IA")
@@ -209,22 +205,20 @@ extension FinalAnalysisView {
 
             if generadorReportes.estaGenerando {
                 ProgressView()
-                    .tint(.cyan)
+                    .tint(themeManager.accentColor)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding(.vertical, 24)
             } else if let mensajeError = generadorReportes.mensajeError {
                 InsightBulletView(
                     title: "Reporte no disponible",
-                    description: mensajeError,
-                    isDarkMode: isDarkMode
+                    description: mensajeError
                 )
             } else {
                 ForEach(parsedInsights.indices, id: \.self) { index in
                     let insight = parsedInsights[index]
                     InsightBulletView(
                         title: insightTitle(for: index),
-                        description: insight.description,
-                        isDarkMode: isDarkMode
+                        description: insight.description
                     )
                 }
             }
@@ -237,56 +231,45 @@ extension FinalAnalysisView {
                 .stroke(borderColor, lineWidth: 1)
         )
     }
-    
+
     private var retryButton: some View {
         Button {
-            // volver a practicar
+            dismiss()
         } label: {
             HStack(spacing: 14) {
                 Image(systemName: "arrow.clockwise")
                     .font(.system(size: 22, weight: .semibold))
-                
+
                 Text("Practicar de Nuevo")
                     .font(.system(size: 20, weight: .bold))
             }
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 22)
-            .background(
-                LinearGradient(
-                    colors: [
-                        Color.cyan.opacity(0.85),
-                        Color.blue
-                    ],
-                    startPoint: .leading,
-                    endPoint: .trailing
-                )
-            )
+            .background(themeManager.accentGradient)
             .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
-            .shadow(color: Color.cyan.opacity(0.22), radius: 18, y: 8)
+            .shadow(color: themeManager.accentColor.opacity(0.22), radius: 18, y: 8)
         }
         .buttonStyle(.plain)
     }
-    
+
     private var floatingThemeButton: some View {
         VStack {
             Spacer()
-            
+
             HStack {
                 Spacer()
-                
+
                 Button {
-                    withAnimation(.easeInOut(duration: 0.2)) {
-                        isDarkMode.toggle()
-                    }
+                    themeManager.toggleTheme()
                 } label: {
-                    Image(systemName: isDarkMode ? "sun.max" : "moon.fill")
+                    Image(systemName: themeManager.isDarkMode ? "sun.max" : "moon.fill")
                         .font(.system(size: 22, weight: .medium))
-                        .foregroundColor(isDarkMode ? .white.opacity(0.9) : .blue)
+                        .foregroundColor(themeManager.isDarkMode ? themeManager.primaryTextColor.opacity(0.9) : themeManager.accentSecondaryColor)
                         .frame(width: 76, height: 76)
                         .background(
                             Circle()
-                                .fill(isDarkMode ? Color.white.opacity(0.10) : Color.white.opacity(0.8))
+                                .fill(themeManager.elevatedCardColor)
                         )
                         .overlay(
                             Circle()
@@ -299,21 +282,21 @@ extension FinalAnalysisView {
             }
         }
     }
-    
+
     private var cardBackground: Color {
-        isDarkMode ? Color.white.opacity(0.05) : Color.white.opacity(0.88)
+        themeManager.cardColor
     }
-    
+
     private var borderColor: Color {
-        isDarkMode ? Color.white.opacity(0.08) : Color.black.opacity(0.06)
+        themeManager.borderColor
     }
-    
+
     private var primaryTextColor: Color {
-        isDarkMode ? .white : .black
+        themeManager.primaryTextColor
     }
-    
+
     private var secondaryTextColor: Color {
-        isDarkMode ? .gray.opacity(0.9) : .gray
+        themeManager.secondaryTextColor
     }
 
     private var parsedInsights: [InsightItem] {
@@ -375,8 +358,14 @@ extension FinalAnalysisView {
     private var fallbackTimelineEvents: [EventoTimelineIA] {
         [
             EventoTimelineIA(time: "0:00", title: "Inicio con energía y objetivo claro"),
-            EventoTimelineIA(time: timelineTimeMarks[2], title: muletillas > 4 ? "Se rompe el ritmo por muletillas" : "Mantienes buen ritmo argumental"),
-            EventoTimelineIA(time: timelineTimeMarks[4], title: contactoVisual > 75 ? "Cierre con presencia visual sólida" : "Conviene reforzar el cierre y la mirada")
+            EventoTimelineIA(
+                time: timelineTimeMarks[2],
+                title: muletillas > 4 ? "Se rompe el ritmo por muletillas" : "Mantienes buen ritmo argumental"
+            ),
+            EventoTimelineIA(
+                time: timelineTimeMarks[4],
+                title: contactoVisual > 75 ? "Cierre con presencia visual sólida" : "Conviene reforzar el cierre y la mirada"
+            )
         ]
     }
 
@@ -411,4 +400,5 @@ private struct InsightItem {
         textoUsuario: "Quiero presentar una app que ayuda a practicar pitches con feedback en tiempo real.",
         duracionSegundos: 97
     )
+    .environmentObject(ThemeManager())
 }

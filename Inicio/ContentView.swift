@@ -10,11 +10,12 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         NavigationStack {
-            RegisterView()
+            WelcomeView()
         }
     }
 }
 
 #Preview {
     ContentView()
+        .environmentObject(ThemeManager())
 }

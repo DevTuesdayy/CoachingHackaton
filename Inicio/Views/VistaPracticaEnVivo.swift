@@ -9,6 +9,8 @@ import SwiftUI
 import Speech
 
 struct VistaPracticaEnVivo: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+
     @ObservedObject var entrenadorVoz: EntrenadorDeVoz
     @StateObject private var analisisFacial = AnalisisFacial()
 
@@ -22,7 +24,7 @@ struct VistaPracticaEnVivo: View {
     var body: some View {
         ZStack {
             #if targetEnvironment(simulator)
-            Color(red: 0.1, green: 0.1, blue: 0.15).ignoresSafeArea()
+            themeManager.backgroundColor.ignoresSafeArea()
             #else
             VistaCamaraAR(session: analisisFacial.arSession)
                 .ignoresSafeArea()
@@ -35,8 +37,8 @@ struct VistaPracticaEnVivo: View {
                         .bold()
                         .padding(.horizontal, 12)
                         .padding(.vertical, 6)
-                        .background(Color.red.opacity(0.3))
-                        .foregroundColor(.red)
+                        .background(themeManager.dangerColor.opacity(0.3))
+                        .foregroundColor(themeManager.dangerColor)
                         .cornerRadius(20)
                     
                     Spacer()
@@ -50,7 +52,7 @@ struct VistaPracticaEnVivo: View {
                             .font(.title2)
                             .foregroundColor(.white)
                             .padding(10)
-                            .background(Color.black.opacity(0.4))
+                            .background(themeManager.overlayColor)
                             .clipShape(Circle())
                     }
                 }
@@ -62,14 +64,14 @@ struct VistaPracticaEnVivo: View {
                     
                     TarjetaFlotante(
                         icono: "exclamationmark.circle.fill",
-                        colorIcono: entrenadorVoz.contadorMuletillas > 3 ? .red : .purple,
+                        colorIcono: entrenadorVoz.contadorMuletillas > 3 ? themeManager.dangerColor : .purple,
                         titulo: "MULETILLAS",
                         valor: "\(entrenadorVoz.contadorMuletillas) detectadas"
                     )
                     
                     TarjetaFlotante(
                         icono: analisisFacial.estaMirandoCamara ? "eye.fill" : "eye.slash.fill",
-                        colorIcono: analisisFacial.estaMirandoCamara ? .cyan : .red,
+                        colorIcono: analisisFacial.estaMirandoCamara ? themeManager.accentColor : themeManager.dangerColor,
                         titulo: "CONTACTO VISUAL",
                         valor: "\(analisisFacial.contactoVisual)"
                     )
@@ -83,7 +85,7 @@ struct VistaPracticaEnVivo: View {
                     VStack {
                         Text(entrenadorVoz.textoEscuchado)
                             .font(.system(size: 16, weight: .medium, design: .rounded))
-                            .foregroundColor(.cyan)
+                            .foregroundColor(themeManager.accentColor)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                             .padding(.vertical, 8)
@@ -94,10 +96,10 @@ struct VistaPracticaEnVivo: View {
                 .defaultScrollAnchor(.bottom)
                 .frame(height: 45)
                 .frame(maxWidth: .infinity)
-                .background(Color.cyan.opacity(0.1))
+                .background(themeManager.accentColor.opacity(0.1))
                 .overlay(
                     RoundedRectangle(cornerRadius: 20)
-                        .stroke(Color.cyan.opacity(0.3), lineWidth: 1)
+                        .stroke(themeManager.accentColor.opacity(0.3), lineWidth: 1)
                 )
                 .cornerRadius(20)
                 .padding(.horizontal, 30)
@@ -106,11 +108,11 @@ struct VistaPracticaEnVivo: View {
                 Button(action: alternarGrabacion) {
                     ZStack {
                         Circle()
-                            .stroke(Color.red.opacity(0.3), lineWidth: 4)
+                            .stroke(themeManager.dangerColor.opacity(0.3), lineWidth: 4)
                             .frame(width: 80, height: 80)
                         
                         Circle()
-                            .fill(Color.red)
+                            .fill(themeManager.dangerColor)
                             .frame(width: estaGrabando ? 40 : 65, height: estaGrabando ? 40 : 65)
                             .cornerRadius(estaGrabando ? 10 : 32.5)
                             .animation(.spring(), value: estaGrabando)
@@ -163,6 +165,8 @@ struct VistaPracticaEnVivo: View {
 }
 
 struct TarjetaFlotante: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+
     var icono: String
     var colorIcono: Color
     var titulo: String
@@ -177,19 +181,19 @@ struct TarjetaFlotante: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(titulo)
                     .font(.system(size: 10, weight: .bold))
-                    .foregroundColor(.gray)
+                    .foregroundColor(themeManager.secondaryTextColor)
                 Text(valor)
                     .font(.system(size: 16, weight: .bold))
-                    .foregroundColor(.white)
+                    .foregroundColor(themeManager.primaryTextColor)
             }
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
-        .background(Color.black.opacity(0.6))
+        .background(themeManager.overlayColor)
         .cornerRadius(15)
         .overlay(
             RoundedRectangle(cornerRadius: 15)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                .stroke(themeManager.borderColor, lineWidth: 1)
         )
     }
 }
@@ -199,4 +203,5 @@ struct TarjetaFlotante: View {
         entrenadorVoz: EntrenadorDeVoz(),
         onFinalizarSesion: { _ in }
     )
+    .environmentObject(ThemeManager())
 }

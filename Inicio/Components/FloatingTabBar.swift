@@ -8,21 +8,20 @@
 import SwiftUI
 
 struct FloatingTabBar: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+
     @Binding var selectedTab: DashboardTab
-    var isDarkMode: Bool
 
     private var barBackground: Color {
-        isDarkMode
-            ? Color(red: 0.02, green: 0.05, blue: 0.12).opacity(0.96)
-            : Color.white.opacity(0.92)
+        themeManager.backgroundColor.opacity(themeManager.isDarkMode ? 0.96 : 0.92)
     }
 
     private var borderColor: Color {
-        isDarkMode ? .white.opacity(0.08) : .black.opacity(0.06)
+        themeManager.borderColor
     }
 
     private var inactiveColor: Color {
-        isDarkMode ? .gray : .gray.opacity(0.9)
+        themeManager.iconMutedColor
     }
 
     var body: some View {
@@ -62,7 +61,7 @@ struct FloatingTabBar: View {
                 Text(label)
                     .font(.system(size: 11, weight: isActive ? .semibold : .regular))
             }
-            .foregroundColor(isActive ? .cyan : inactiveColor)
+            .foregroundColor(isActive ? themeManager.accentColor : inactiveColor)
             .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
@@ -71,10 +70,11 @@ struct FloatingTabBar: View {
 
 #Preview {
     ZStack {
-        Color.black.ignoresSafeArea()
+        AppBackgroundView()
         VStack {
             Spacer()
-            FloatingTabBar(selectedTab: .constant(.home), isDarkMode: true)
+            FloatingTabBar(selectedTab: .constant(.home))
         }
     }
+    .environmentObject(ThemeManager())
 }

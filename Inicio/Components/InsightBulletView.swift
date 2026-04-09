@@ -8,25 +8,26 @@
 import SwiftUI
 
 struct InsightBulletView: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+
     let title: String
     let description: String
-    let isDarkMode: Bool
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
                 .font(.system(size: 17, weight: .semibold))
-                .foregroundColor(isDarkMode ? .white : .black)
+                .foregroundColor(themeManager.primaryTextColor)
             
             Text(description)
                 .font(.system(size: 14))
-                .foregroundColor(.gray)
+                .foregroundColor(themeManager.secondaryTextColor)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(isDarkMode ? Color.white.opacity(0.04) : Color.black.opacity(0.03))
+                .fill(themeManager.elevatedCardColor)
         )
     }
 }

@@ -8,19 +8,15 @@
 import SwiftUI
 
 struct AuthHeaderView: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+
     var body: some View {
         VStack(spacing: 15) {
             ZStack {
                 RoundedRectangle(cornerRadius: 25)
-                    .fill(
-                        LinearGradient(
-                            colors: [.cyan, .blue],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
+                    .fill(themeManager.accentGradient)
                     .frame(width: 80, height: 80)
-                    .shadow(color: .blue.opacity(0.5), radius: 20)
+                    .shadow(color: themeManager.accentSecondaryColor.opacity(0.5), radius: 20)
 
                 Image(systemName: "mic.fill")
                     .font(.system(size: 40))
@@ -29,11 +25,11 @@ struct AuthHeaderView: View {
 
             Text("PitchCoach")
                 .font(.system(size: 36, weight: .bold))
-                .foregroundColor(.white)
+                .foregroundColor(themeManager.primaryTextColor)
 
             Text("Tu espejo inteligente de comunicación")
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundColor(themeManager.secondaryTextColor)
         }
         .padding(.top, 40)
     }
@@ -41,7 +37,8 @@ struct AuthHeaderView: View {
 
 #Preview {
     ZStack {
-        Color.black.ignoresSafeArea()
+        AppBackgroundView()
         AuthHeaderView()
     }
+    .environmentObject(ThemeManager())
 }

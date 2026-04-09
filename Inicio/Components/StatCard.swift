@@ -10,41 +10,44 @@
 import SwiftUI
 
 struct StatCard: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+
     var value: String
     var label: String
     var unit: String = ""
-    var valueColor: Color = .white
-    
+    var valueColor: Color? = nil
+
     var body: some View {
         VStack(spacing: 8) {
             HStack(alignment: .bottom, spacing: 2) {
                 Text(value)
                     .font(.system(size: 32, weight: .bold))
-                    .foregroundColor(valueColor)
+                    .foregroundColor(valueColor ?? themeManager.primaryTextColor)
                 
                 if !unit.isEmpty {
                     Text(unit)
                         .font(.system(size: 16, weight: .semibold))
-                        .foregroundColor(.gray.opacity(0.6))
+                        .foregroundColor(themeManager.secondaryTextColor.opacity(0.8))
                         .padding(.bottom, 5)
                 }
             }
             
             Text(label)
                 .font(.system(size: 10, weight: .bold))
-                .foregroundColor(.gray)
+                .foregroundColor(themeManager.secondaryTextColor)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 25)
-        .background(Color.white.opacity(0.05))
+        .background(themeManager.cardColor)
         .cornerRadius(22)
     }
 }
 
 #Preview {
     ZStack {
-        Color.black.ignoresSafeArea()
+        AppBackgroundView()
         StatCard(value: "85", label: "SCORE PROMEDIO", unit: "/100")
             .padding()
     }
+    .environmentObject(ThemeManager())
 }
