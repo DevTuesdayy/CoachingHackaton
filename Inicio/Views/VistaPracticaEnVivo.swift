@@ -11,11 +11,14 @@ import Speech
 struct VistaPracticaEnVivo: View {
     @ObservedObject var entrenadorVoz: EntrenadorDeVoz
     @StateObject private var analisisFacial = AnalisisFacial()
-    
+
+    let onFinalizarSesion: (ReporteSesion) -> Void
+
     @Environment(\.presentationMode) var presentationMode
-    
+
     @State private var estaGrabando = false
-    
+    @State private var fechaInicioSesion: Date?
+
     var body: some View {
         ZStack {
             #if targetEnvironment(simulator)
@@ -123,14 +126,34 @@ struct VistaPracticaEnVivo: View {
     
     private func alternarGrabacion() {
         if estaGrabando {
-            entrenadorVoz.detenerGrabacion()
-            analisisFacial.detenerAnalisis()
-            estaGrabando = false
+            finalizarSesion()
         } else {
+            fechaInicioSesion = Date()
             entrenadorVoz.iniciarGrabacion()
             analisisFacial.iniciarAnalisis()
             estaGrabando = true
         }
+    }
+
+    private func finalizarSesion() {
+        entrenadorVoz.detenerGrabacion()
+        analisisFacial.detenerAnalisis()
+        estaGrabando = false
+
+        let reporte = ReporteSesion(
+            contactoVisual: analisisFacial.contactoVisual,
+            muletillas: entrenadorVoz.contadorMuletillas,
+            textoUsuario: entrenadorVoz.textoEscuchado,
+            duracionSegundos: duracionSesion
+        )
+
+        presentationMode.wrappedValue.dismiss()
+        onFinalizarSesion(reporte)
+    }
+
+    private var duracionSesion: Int {
+        guard let fechaInicioSesion else { return 0 }
+        return max(1, Int(Date().timeIntervalSince(fechaInicioSesion)))
     }
     
     private func solicitarPermisos() {
@@ -172,5 +195,8 @@ struct TarjetaFlotante: View {
 }
 
 #Preview {
-    VistaPracticaEnVivo(entrenadorVoz: EntrenadorDeVoz())
+    VistaPracticaEnVivo(
+        entrenadorVoz: EntrenadorDeVoz(),
+        onFinalizarSesion: { _ in }
+    )
 }

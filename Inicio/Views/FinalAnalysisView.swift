@@ -9,12 +9,32 @@ import SwiftUI
 
 struct FinalAnalysisView: View {
     @Environment(\.dismiss) private var dismiss
-    
+    @StateObject private var generadorReportes = GeneradorReportes()
+
     @State private var selectedTab: AnalysisSection = .timeline
     @State private var isDarkMode = true
-    
-    let score: Int = 82
-    let levelText: String = "EXCELENTE"
+
+    let contactoVisual: Int
+    let muletillas: Int
+    let textoUsuario: String
+    let duracionSegundos: Int
+
+    private var score: Int {
+        max(0, min(100, contactoVisual - (muletillas * 3)))
+    }
+
+    private var levelText: String {
+        switch score {
+        case 85...100:
+            "EXCELENTE"
+        case 70...84:
+            "BUENO"
+        case 50...69:
+            "MEJORABLE"
+        default:
+            "CRITICO"
+        }
+    }
     
     var body: some View {
         ZStack {
@@ -43,6 +63,15 @@ struct FinalAnalysisView: View {
             }
             
             floatingThemeButton
+        }
+        .task {
+            guard generadorReportes.analisisGenerado == nil, generadorReportes.mensajeError == nil else { return }
+            await generadorReportes.generarReporte(
+                contactoVisual: contactoVisual,
+                muletillas: muletillas,
+                textoUsuario: textoUsuario,
+                duracionSegundos: duracionSegundos
+            )
         }
     }
 }
@@ -101,7 +130,7 @@ extension FinalAnalysisView {
     
     private var segmentedSection: some View {
         HStack(spacing: 0) {
-            segmentButton(title: "Insights de IA", section: .insights)
+            segmentButton(title: "Análisis de IA", section: .insights)
             segmentButton(title: "Línea de Tiempo", section: .timeline)
         }
         .padding(6)
@@ -147,15 +176,20 @@ extension FinalAnalysisView {
             }
             
             ScoreLineChartView(
-                values: [56, 72, 65, 48, 76, 79],
-                labels: ["0:00", "0:30", "1:00", "1:30", "2:00", "2:30"],
+                values: timelineValues,
+                labels: timelineLabels,
                 isDarkMode: isDarkMode
             )
             .frame(height: 220)
             
             VStack(spacing: 14) {
-                TimelineRowView(time: "0:00", title: "Inicio", isDarkMode: isDarkMode)
-                TimelineRowView(time: "1:00", title: "Contacto visual", isDarkMode: isDarkMode)
+                ForEach(timelineEvents, id: \.time) { event in
+                    TimelineRowView(
+                        time: event.time,
+                        title: event.title,
+                        isDarkMode: isDarkMode
+                    )
+                }
             }
         }
         .padding(22)
@@ -172,24 +206,28 @@ extension FinalAnalysisView {
             Text("Insights de IA")
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(primaryTextColor)
-            
-            InsightBulletView(
-                title: "Buen cierre",
-                description: "Terminaste con seguridad y mantuviste un ritmo estable al final.",
-                isDarkMode: isDarkMode
-            )
-            
-            InsightBulletView(
-                title: "Mejora el contacto visual",
-                description: "Hubo una caída cerca del minuto 1:30. Mantén la mirada al frente más tiempo.",
-                isDarkMode: isDarkMode
-            )
-            
-            InsightBulletView(
-                title: "Fluidez sólida",
-                description: "Tu discurso fue claro y con pocas muletillas en la segunda mitad.",
-                isDarkMode: isDarkMode
-            )
+
+            if generadorReportes.estaGenerando {
+                ProgressView()
+                    .tint(.cyan)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.vertical, 24)
+            } else if let mensajeError = generadorReportes.mensajeError {
+                InsightBulletView(
+                    title: "Reporte no disponible",
+                    description: mensajeError,
+                    isDarkMode: isDarkMode
+                )
+            } else {
+                ForEach(parsedInsights.indices, id: \.self) { index in
+                    let insight = parsedInsights[index]
+                    InsightBulletView(
+                        title: insightTitle(for: index),
+                        description: insight.description,
+                        isDarkMode: isDarkMode
+                    )
+                }
+            }
         }
         .padding(22)
         .background(cardBackground)
@@ -277,6 +315,84 @@ extension FinalAnalysisView {
     private var secondaryTextColor: Color {
         isDarkMode ? .gray.opacity(0.9) : .gray
     }
+
+    private var parsedInsights: [InsightItem] {
+        let insightLines = generadorReportes.analisisGenerado?.insights ?? fallbackInsights
+        return insightLines.map { line in
+            InsightItem(description: line)
+        }
+    }
+
+    private var fallbackInsights: [String] {
+        [
+            "Mantienes un contacto visual de \(contactoVisual)%, lo que da una buena base de presencia.",
+            "Se detectaron \(muletillas) muletillas durante la sesión; conviene reducirlas para sonar más preciso.",
+            "Refuerza tu cierre con frases más directas y pausas más controladas."
+        ]
+    }
+
+    private var timelineValues: [CGFloat] {
+        let puntos = generadorReportes.analisisGenerado?.timelineChart ?? fallbackTimelineChart
+        return puntos.map { CGFloat($0.score) }
+    }
+
+    private var timelineLabels: [String] {
+        let puntos = generadorReportes.analisisGenerado?.timelineChart ?? fallbackTimelineChart
+        return puntos.map(\.time)
+    }
+
+    private var timelineEvents: [EventoTimelineIA] {
+        generadorReportes.analisisGenerado?.timelineEvents ?? fallbackTimelineEvents
+    }
+
+    private func insightTitle(for index: Int) -> String {
+        switch index {
+        case 0:
+            "Fortaleza principal"
+        case 1:
+            "Área crítica"
+        default:
+            "Consejo accionable"
+        }
+    }
+
+    private var fallbackTimelineChart: [PuntoTimelineIA] {
+        let times = timelineTimeMarks
+        let scores = [
+            max(35, score - 16),
+            max(40, score - 10),
+            score,
+            max(30, score - 12),
+            max(45, score - 6),
+            score
+        ]
+
+        return zip(times, scores).map { time, score in
+            PuntoTimelineIA(time: time, score: score)
+        }
+    }
+
+    private var fallbackTimelineEvents: [EventoTimelineIA] {
+        [
+            EventoTimelineIA(time: "0:00", title: "Inicio con energía y objetivo claro"),
+            EventoTimelineIA(time: timelineTimeMarks[2], title: muletillas > 4 ? "Se rompe el ritmo por muletillas" : "Mantienes buen ritmo argumental"),
+            EventoTimelineIA(time: timelineTimeMarks[4], title: contactoVisual > 75 ? "Cierre con presencia visual sólida" : "Conviene reforzar el cierre y la mirada")
+        ]
+    }
+
+    private var timelineTimeMarks: [String] {
+        let total = max(duracionSegundos, 1)
+        return (0..<6).map { index in
+            let second = Int(round(Double(total) * Double(index) / 5.0))
+            return formattedTime(second)
+        }
+    }
+
+    private func formattedTime(_ totalSeconds: Int) -> String {
+        let minutes = totalSeconds / 60
+        let seconds = totalSeconds % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
 }
 
 enum AnalysisSection {
@@ -284,6 +400,15 @@ enum AnalysisSection {
     case timeline
 }
 
+private struct InsightItem {
+    let description: String
+}
+
 #Preview {
-    FinalAnalysisView()
+    FinalAnalysisView(
+        contactoVisual: 82,
+        muletillas: 3,
+        textoUsuario: "Quiero presentar una app que ayuda a practicar pitches con feedback en tiempo real.",
+        duracionSegundos: 97
+    )
 }

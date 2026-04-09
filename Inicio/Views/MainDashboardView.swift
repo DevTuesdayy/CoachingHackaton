@@ -13,6 +13,8 @@ struct MainDashboardView: View {
     @StateObject private var entrenadorVoz = EntrenadorDeVoz()
     @State private var isDarkMode = true
     @State private var mostrarPracticaEnVivo = false
+    @State private var reportePendiente: ReporteSesion?
+    @State private var reporteSesion: ReporteSesion?
     @State private var selectedTab: DashboardTab = .home
 
     @Environment(\.modelContext) private var context
@@ -54,8 +56,24 @@ struct MainDashboardView: View {
         .onAppear {
             viewModel.loadCurrentUser(context: context)
         }
-        .fullScreenCover(isPresented: $mostrarPracticaEnVivo) {
-            VistaPracticaEnVivo(entrenadorVoz: entrenadorVoz)
+        .fullScreenCover(
+            isPresented: $mostrarPracticaEnVivo,
+            onDismiss: presentarReportePendiente
+        ) {
+            VistaPracticaEnVivo(
+                entrenadorVoz: entrenadorVoz,
+                onFinalizarSesion: { reporte in
+                    reportePendiente = reporte
+                }
+            )
+        }
+        .fullScreenCover(item: $reporteSesion) { reporte in
+            FinalAnalysisView(
+                contactoVisual: reporte.contactoVisual,
+                muletillas: reporte.muletillas,
+                textoUsuario: reporte.textoUsuario,
+                duracionSegundos: reporte.duracionSegundos
+            )
         }
     }
 }
@@ -232,6 +250,12 @@ extension MainDashboardView {
 
     private var bottomTabBar: some View {
         FloatingTabBar(selectedTab: $selectedTab, isDarkMode: isDarkMode)
+    }
+
+    private func presentarReportePendiente() {
+        guard let reportePendiente else { return }
+        reporteSesion = reportePendiente
+        self.reportePendiente = nil
     }
 }
 

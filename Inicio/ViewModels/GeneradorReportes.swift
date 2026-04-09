@@ -6,38 +6,75 @@
 //
 
 import Foundation
+import Combine
 import FoundationModels
 
-class GeneradorReportes{
-    
-    static func generarReporteReal(contactoVisual: Int, muletillas: Int, textoUsuario: String) async -> String {
+@Generable(description: "Analisis completo de una sesion de pitch")
+struct AnalisisSesionIA {
+    var insights: [String]
+    var timelineChart: [PuntoTimelineIA]
+    var timelineEvents: [EventoTimelineIA]
+}
+
+@Generable(description: "Punto del score en una linea de tiempo")
+struct PuntoTimelineIA {
+    var time: String
+    var score: Int
+}
+
+@Generable(description: "Evento clave dentro de la sesion")
+struct EventoTimelineIA {
+    var time: String
+    var title: String
+}
+
+@MainActor
+final class GeneradorReportes: ObservableObject {
+    @Published var analisisGenerado: AnalisisSesionIA?
+    @Published var estaGenerando = false
+    @Published var mensajeError: String?
+
+    func generarReporte(
+        contactoVisual: Int,
+        muletillas: Int,
+        textoUsuario: String,
+        duracionSegundos: Int
+    ) async {
+        estaGenerando = true
+        mensajeError = nil
+        analisisGenerado = nil
+
         let instrucciones = """
-                Eres 'PitchCoach', un coach ejecutivo estricto pero constructivo.
-                Analiza las métricas y la transcripción del usuario.
-                Devuelve exactamente 3 puntos clave usando viñetas:
-                1. Tu mayor fortaleza.
-                2. Un área crítica de mejora.
-                3. Un consejo práctico accionable.
-                No saludes, no uses introducciones, ve directo al análisis. Responde en español.
+        Eres 'PitchCoach', un coach ejecutivo estricto pero constructivo.
+        Analiza las métricas y la transcripción del usuario.
+        Responde en español con una estructura coherente y realista.
+        Genera exactamente 3 insights breves.
+        Genera exactamente 6 puntos para timelineChart distribuidos entre 0:00 y la duracion real de la sesion.
+        Genera exactamente 3 eventos para timelineEvents con momentos importantes del pitch.
+        Los scores y eventos deben ser consistentes con el contacto visual, las muletillas y el contenido del pitch.
+        Nunca inventes tiempos fuera de la duracion real.
         """
-        
+
         let contexto = """
-                Métricas de esta sesión:
-                - Contacto Visual: \(contactoVisual)%
-                - Muletillas detectadas: \(muletillas)
-                - Transcripción del pitch: "\(textoUsuario)"
+        Métricas de esta sesión:
+        - Contacto Visual: \(contactoVisual)%
+        - Muletillas detectadas: \(muletillas)
+        - Duración total: \(duracionSegundos) segundos
+        - Transcripción del pitch: "\(textoUsuario)"
         """
-        
-        do{
+
+        do {
             let session = LanguageModelSession(instructions: instrucciones)
-                        
-            print("Invocando a Apple Intelligence vía Neural Engine...")
-                        
-            let respuesta = try await session.respond(to: contexto)
-                        
-            return respuesta.content
+            let respuesta = try await session.respond(
+                to: contexto,
+                generating: AnalisisSesionIA.self
+            )
+            analisisGenerado = respuesta.content
         } catch {
-            return "Error al generar el reporte local: \(error.localizedDescription)"
+            analisisGenerado = nil
+            mensajeError = "No se pudo generar el reporte: \(error.localizedDescription)"
         }
+
+        estaGenerando = false
     }
 }
