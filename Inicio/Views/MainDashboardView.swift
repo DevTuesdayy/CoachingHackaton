@@ -7,8 +7,9 @@
 import SwiftUI
 
 struct MainDashboardView: View {
-    // 1. Estado para controlar el modo de color
+        @StateObject private var entrenadorVoz = EntrenadorDeVoz()
         @State private var isDarkMode = true
+        @State private var mostrarPracticaEnVivo = false
         
         // 2. Definición de colores dinámicos
         private var backgroundColor: Color {
@@ -110,6 +111,9 @@ struct MainDashboardView: View {
                                 )
                         )
                         .padding(.horizontal)
+                        .onTapGesture {
+                            mostrarPracticaEnVivo = true
+                        }
                         
                         // --- ESTADÍSTICAS (SESIONES Y SCORE) ---
                         HStack(spacing: 15) {
@@ -183,6 +187,9 @@ struct MainDashboardView: View {
                 .overlay(Rectangle().frame(height: 0.5).foregroundColor(.white.opacity(0.1)), alignment: .top)
             }
         }
+        .fullScreenCover(isPresented: $mostrarPracticaEnVivo) {
+                    VistaPracticaEnVivo(entrenadorVoz: entrenadorVoz)
+                }
     }
 }
 
@@ -255,3 +262,4 @@ struct MainDashboardView_Previews: PreviewProvider {
         MainDashboardView()
     }
 }
+

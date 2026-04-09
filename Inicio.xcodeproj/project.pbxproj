@@ -10,9 +10,22 @@
 		8863DBFB2F8484B500DE35C3 /* Inicio.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Inicio.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		ED09D2D22F873D650096FBA0 /* Exceptions for "Inicio" folder in "Inicio" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 8863DBFA2F8484B500DE35C3 /* Inicio */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		8863DBFD2F8484B500DE35C3 /* Inicio */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				ED09D2D22F873D650096FBA0 /* Exceptions for "Inicio" folder in "Inicio" target */,
+			);
 			path = Inicio;
 			sourceTree = "<group>";
 		};
@@ -78,7 +91,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2630;
-				LastUpgradeCheck = 2630;
+				LastUpgradeCheck = 2640;
 				TargetAttributes = {
 					8863DBFA2F8484B500DE35C3 = {
 						CreatedOnToolsVersion = 26.3;
@@ -256,6 +269,8 @@
 				DEVELOPMENT_TEAM = 77Q7XW5F2J;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Inicio/Info.plist;
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "PitchCoach necesita analizar tu voz para detectar muletillas.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -288,6 +303,8 @@
 				DEVELOPMENT_TEAM = 77Q7XW5F2J;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Inicio/Info.plist;
+				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "PitchCoach necesita analizar tu voz para detectar muletillas.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
