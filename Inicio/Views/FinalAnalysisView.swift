@@ -21,7 +21,12 @@ struct FinalAnalysisView: View {
     let volumenPromedio: Double
 
     private var score: Int {
-        max(0, min(100, contactoVisual - (muletillas * 3)))
+        ReporteSesion.calcularScore(
+            contactoVisual: contactoVisual,
+            muletillas: muletillas,
+            duracionSegundos: duracionSegundos,
+            volumenPromedio: volumenPromedio
+        )
     }
 
     private var levelText: String {

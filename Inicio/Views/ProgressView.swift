@@ -7,50 +7,12 @@
 
 import SwiftUI
 import Charts
+import SwiftData
 
-// MARK: - Modelos de Datos
-struct ScoreData: Identifiable {
-    let id = UUID()
-    let day: String
-    let score: Int
-}
-
-struct Session: Identifiable {
-    let id = UUID()
-    let title: String
-    let date: String
-    let duration: String
-    let score: Int
-    
-    var scoreColor: Color {
-        if score >= 85 { return .green }
-        if score >= 75 { return .yellow }
-        return .orange
-    }
-}
-
-// MARK: - Vista Principal
 struct ProgressView: View {
+    @Environment(\.modelContext) private var context
     @EnvironmentObject private var themeManager: ThemeManager
-
-    // Datos de la gráfica
-    let chartData: [ScoreData] = [
-        ScoreData(day: "Lun", score: 65),
-        ScoreData(day: "Mar", score: 68),
-        ScoreData(day: "Mié", score: 75),
-        ScoreData(day: "Jue", score: 72),
-        ScoreData(day: "Vie", score: 85),
-        ScoreData(day: "Sáb", score: 82),
-        ScoreData(day: "Dom", score: 92)
-    ]
-    
-    // Datos del historial
-    let sessions: [Session] = [
-        Session(title: "Pitch para Inversores", date: "Hoy, 10:00 AM", duration: "4:30", score: 90),
-        Session(title: "Presentación de Ventas", date: "Ayer, 16:45", duration: "3:15", score: 82),
-        Session(title: "Reunión de Equipo", date: "Jueves, 09:30", duration: "5:00", score: 72),
-        Session(title: "Ensayo General", date: "Miércoles, 14:00", duration: "6:20", score: 74)
-    ]
+    @StateObject private var viewModel = ProgressViewModel()
     
     var body: some View {
         ZStack {
@@ -83,7 +45,7 @@ struct ProgressView: View {
                                     .foregroundColor(themeManager.secondaryTextColor)
                             }
                             Spacer()
-                            Text("▲ +15%")
+                            Text(resumenCambio)
                                 .font(.system(size: 14, weight: .bold))
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 5)
@@ -93,7 +55,7 @@ struct ProgressView: View {
                         }
                         
                         Chart {
-                            ForEach(chartData) { item in
+                            ForEach(viewModel.chartData) { item in
                                 AreaMark(
                                     x: .value("Día", item.day),
                                     y: .value("Score", item.score)
@@ -138,8 +100,8 @@ struct ProgressView: View {
                     
                     // --- METRICAS RÁPIDAS ---
                     HStack(spacing: 15) {
-                        ProgressStatCard(title: "92", subtitle: "MEJOR SCORE", icon: "person.fill", iconBg: .purple)
-                        ProgressStatCard(title: "85%", subtitle: "CLARIDAD", icon: "bolt.fill", iconBg: .orange)
+                        ProgressStatCard(title: "\(viewModel.mejorScore)", subtitle: "MEJOR SCORE", icon: "person.fill", iconBg: .purple)
+                        ProgressStatCard(title: "\(viewModel.claridadPromedio)%", subtitle: "CLARIDAD", icon: "bolt.fill", iconBg: .orange)
                     }
                     .padding(.horizontal)
                     
@@ -151,8 +113,12 @@ struct ProgressView: View {
                             .padding(.horizontal)
                         
                         LazyVStack(spacing: 12) {
-                            ForEach(sessions) { session in
-                                SessionRowView(session: session)
+                            if viewModel.sessions.isEmpty {
+                                emptyHistoryCard
+                            } else {
+                                ForEach(viewModel.sessions) { session in
+                                    SessionRowView(session: session)
+                                }
                             }
                         }
                         .padding(.horizontal)
@@ -163,10 +129,36 @@ struct ProgressView: View {
             }
             .frame(maxWidth: .infinity)
         }
+        .onAppear {
+            viewModel.loadProgress(context: context)
+        }
     }
 }
 
 // MARK: - Componentes de Apoyo
+
+extension ProgressView {
+    private var resumenCambio: String {
+        let scores = viewModel.chartData.map(\.score).filter { $0 > 0 }
+        guard let first = scores.first, let last = scores.last, first > 0 else {
+            return "Sin datos"
+        }
+
+        let change = Int(round((Double(last - first) / Double(first)) * 100))
+        return change >= 0 ? "▲ +\(change)%" : "▼ \(change)%"
+    }
+
+    private var emptyHistoryCard: some View {
+        Text("Aún no hay sesiones guardadas. Completa una práctica para ver tu historial real.")
+            .font(.system(size: 15, weight: .medium))
+            .foregroundColor(themeManager.secondaryTextColor)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(18)
+            .background(themeManager.cardColor)
+            .cornerRadius(25)
+            .overlay(RoundedRectangle(cornerRadius: 25).stroke(themeManager.borderColor, lineWidth: 1))
+    }
+}
 
 struct ProgressStatCard: View {
     @EnvironmentObject private var themeManager: ThemeManager
@@ -212,23 +204,34 @@ struct SessionRowView: View {
 
     let session: Session
     
+    private var scoreColor: Color {
+        switch session.scoreColorName {
+        case "green":
+            .green
+        case "yellow":
+            .yellow
+        default:
+            .orange
+        }
+    }
+    
     var body: some View {
         HStack(spacing: 15) {
             // Círculo de Score dinámico
             ZStack {
                 Circle()
-                    .stroke(session.scoreColor.opacity(0.15), lineWidth: 3)
+                    .stroke(scoreColor.opacity(0.15), lineWidth: 3)
                     .frame(width: 48, height: 48)
                 
                 Circle()
                     .trim(from: 0, to: CGFloat(session.score) / 100)
-                    .stroke(session.scoreColor, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                    .stroke(scoreColor, style: StrokeStyle(lineWidth: 3, lineCap: .round))
                     .frame(width: 48, height: 48)
                     .rotationEffect(.degrees(-90))
                 
                 Text("\(session.score)")
                     .font(.system(size: 13, weight: .bold))
-                    .foregroundColor(session.scoreColor)
+                    .foregroundColor(scoreColor)
             }
             
             VStack(alignment: .leading, spacing: 4) {
@@ -265,5 +268,3 @@ struct ProgressView_Previews: PreviewProvider {
             .environmentObject(ThemeManager())
     }
 }
-
-

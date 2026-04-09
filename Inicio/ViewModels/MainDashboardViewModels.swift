@@ -52,18 +52,26 @@ final class MainDashboardViewModel: ObservableObject {
         }
     }
 
-    func registrarSesion(reporte: ReporteSesion, context: ModelContext) {
+    func registrarSesion(reporte: ReporteSesion, context: ModelContext) async {
         guard let currentEmail = UserDefaults.standard.string(forKey: "currentUserEmail") else {
             return
         }
 
-        let score = max(0, min(100, reporte.contactoVisual - (reporte.muletillas * 3)))
+        let score = ReporteSesion.calcularScore(
+            contactoVisual: reporte.contactoVisual,
+            muletillas: reporte.muletillas,
+            duracionSegundos: reporte.duracionSegundos,
+            volumenPromedio: reporte.volumenPromedio
+        )
+        let temaPrincipal = await GeneradorReportes.analizarTema(textoUsuario: reporte.textoUsuario)
         let sesion = SesionPractica(
             userEmail: currentEmail,
             duracionSegundos: reporte.duracionSegundos,
             contactoVisual: reporte.contactoVisual,
             muletillas: reporte.muletillas,
+            volumenPromedio: reporte.volumenPromedio,
             textoUsuario: reporte.textoUsuario,
+            temaPrincipal: temaPrincipal,
             scorePromedio: score
         )
 

@@ -15,7 +15,9 @@ final class SesionPractica {
     var duracionSegundos: Int
     var contactoVisual: Int
     var muletillas: Int
+    var volumenPromedio: Double
     var textoUsuario: String
+    var temaPrincipal: String
     var scorePromedio: Int
 
     init(
@@ -24,7 +26,9 @@ final class SesionPractica {
         duracionSegundos: Int,
         contactoVisual: Int,
         muletillas: Int,
+        volumenPromedio: Double,
         textoUsuario: String,
+        temaPrincipal: String,
         scorePromedio: Int
     ) {
         self.userEmail = userEmail
@@ -32,7 +36,9 @@ final class SesionPractica {
         self.duracionSegundos = duracionSegundos
         self.contactoVisual = contactoVisual
         self.muletillas = muletillas
+        self.volumenPromedio = volumenPromedio
         self.textoUsuario = textoUsuario
+        self.temaPrincipal = temaPrincipal
         self.scorePromedio = scorePromedio
     }
 }

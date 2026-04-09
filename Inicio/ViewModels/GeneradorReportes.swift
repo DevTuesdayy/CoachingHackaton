@@ -28,6 +28,11 @@ struct EventoTimelineIA {
     var title: String
 }
 
+@Generable(description: "Tema principal del discurso")
+struct TemaSesionIA {
+    var tema: String
+}
+
 @MainActor
 final class GeneradorReportes: ObservableObject {
     @Published var analisisGenerado: AnalisisSesionIA?
@@ -78,5 +83,40 @@ final class GeneradorReportes: ObservableObject {
         }
 
         estaGenerando = false
+    }
+
+    static func analizarTema(textoUsuario: String) async -> String {
+        let textoLimpio = textoUsuario.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !textoLimpio.isEmpty, textoLimpio != "Escuchando..." else {
+            return "Práctica general"
+        }
+
+        let instrucciones = """
+        Identifica el tema principal de un speech o pitch.
+        Devuelve un tema breve en español, de entre 2 y 5 palabras.
+        Debe ser una categoria o asunto claro, no una frase larga.
+        """
+
+        do {
+            let session = LanguageModelSession(instructions: instrucciones)
+            let respuesta = try await session.respond(
+                to: "Texto del speech: \"\(textoLimpio)\"",
+                generating: TemaSesionIA.self
+            )
+            let tema = respuesta.content.tema.trimmingCharacters(in: .whitespacesAndNewlines)
+            return tema.isEmpty ? fallbackTema(from: textoLimpio) : tema
+        } catch {
+            return fallbackTema(from: textoLimpio)
+        }
+    }
+
+    private static func fallbackTema(from texto: String) -> String {
+        let palabras = texto
+            .components(separatedBy: CharacterSet.whitespacesAndNewlines.union(.punctuationCharacters))
+            .filter { !$0.isEmpty }
+            .prefix(4)
+
+        let candidato = palabras.joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
+        return candidato.isEmpty ? "Práctica general" : candidato
     }
 }

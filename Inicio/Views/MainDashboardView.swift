@@ -244,7 +244,9 @@ extension MainDashboardView {
 
     private func presentarReportePendiente() {
         guard let reportePendiente else { return }
-        viewModel.registrarSesion(reporte: reportePendiente, context: context)
+        Task {
+            await viewModel.registrarSesion(reporte: reportePendiente, context: context)
+        }
         reporteSesion = reportePendiente
         self.reportePendiente = nil
     }

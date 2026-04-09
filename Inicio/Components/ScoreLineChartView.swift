@@ -19,7 +19,13 @@ struct ScoreLineChartView: View {
             let height = geometry.size.height
             let maxValue = (values.max() ?? 1)
             let minValue = (values.min() ?? 0)
+            let hasVariation = maxValue != minValue
             let range = max(maxValue - minValue, 1)
+            let horizontalPadding: CGFloat = 12
+            let topPadding: CGFloat = 20
+            let bottomPadding: CGFloat = 40
+            let usableWidth = max(width - (horizontalPadding * 2), 1)
+            let usableHeight = max(height - topPadding - bottomPadding, 1)
             
             ZStack {
                 VStack(spacing: 0) {
@@ -33,9 +39,9 @@ struct ScoreLineChartView: View {
                 
                 Path { path in
                     for index in values.indices {
-                        let x = width * CGFloat(index) / CGFloat(max(values.count - 1, 1))
-                        let normalizedY = (values[index] - minValue) / range
-                        let y = height - (normalizedY * (height - 40)) - 20
+                        let x = horizontalPadding + (usableWidth * CGFloat(index) / CGFloat(max(values.count - 1, 1)))
+                        let normalizedY = hasVariation ? (values[index] - minValue) / range : 0.5
+                        let y = topPadding + ((1 - normalizedY) * usableHeight)
                         
                         if index == 0 {
                             path.move(to: CGPoint(x: x, y: y))
@@ -47,9 +53,9 @@ struct ScoreLineChartView: View {
                 .stroke(themeManager.accentColor, style: StrokeStyle(lineWidth: 4, lineCap: .round, lineJoin: .round))
                 
                 ForEach(values.indices, id: \.self) { index in
-                    let x = width * CGFloat(index) / CGFloat(max(values.count - 1, 1))
-                    let normalizedY = (values[index] - minValue) / range
-                    let y = height - (normalizedY * (height - 40)) - 20
+                    let x = horizontalPadding + (usableWidth * CGFloat(index) / CGFloat(max(values.count - 1, 1)))
+                    let normalizedY = hasVariation ? (values[index] - minValue) / range : 0.5
+                    let y = topPadding + ((1 - normalizedY) * usableHeight)
                     
                     Circle()
                         .fill(themeManager.backgroundColor)

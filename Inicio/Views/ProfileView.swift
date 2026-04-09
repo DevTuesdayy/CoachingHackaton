@@ -90,6 +90,28 @@ struct ProfileView: View {
                     )
                     .padding(.horizontal)
                     
+                    HStack(spacing: 15) {
+                        ProfileStatCard(
+                            title: "\(viewModel.mejorScore)",
+                            subtitle: "MEJOR SCORE",
+                            icon: "rosette",
+                            iconColor: themeManager.successColor
+                        )
+                        ProfileStatCard(
+                            title: "\(viewModel.claridadPromedio)%",
+                            subtitle: "CLARIDAD",
+                            icon: "eye.fill",
+                            iconColor: themeManager.accentColor
+                        )
+                    }
+                    .padding(.horizontal)
+
+                    ProfileSummaryCard(
+                        totalSesiones: viewModel.totalSesiones,
+                        planName: viewModel.planName
+                    )
+                    .padding(.horizontal)
+
                     VStack(spacing: 12) {
                         ProfileOptionRow(icon: "mic.fill", title: "Audio y Micrófono", subtitle: "Dispositivos por defecto")
                         ProfileOptionRow(icon: "camera.fill", title: "Cámara y Video", subtitle: "Preferencias de grabación")
@@ -126,6 +148,85 @@ struct ProfileView: View {
         .onAppear {
             viewModel.loadCurrentUser(context: context)
         }
+    }
+}
+
+struct ProfileStatCard: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+
+    let title: String
+    let subtitle: String
+    let icon: String
+    let iconColor: Color
+
+    var body: some View {
+        HStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(iconColor.opacity(0.14))
+                    .frame(width: 42, height: 42)
+                Image(systemName: icon)
+                    .foregroundColor(iconColor)
+                    .font(.system(size: 17, weight: .semibold))
+            }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.title3)
+                    .bold()
+                    .foregroundColor(themeManager.primaryTextColor)
+                Text(subtitle)
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundColor(themeManager.secondaryTextColor)
+                    .kerning(0.4)
+            }
+
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .frame(height: 84)
+        .background(themeManager.cardColor)
+        .cornerRadius(24)
+        .overlay(
+            RoundedRectangle(cornerRadius: 24)
+                .stroke(themeManager.borderColor, lineWidth: 1)
+        )
+    }
+}
+
+struct ProfileSummaryCard: View {
+    @EnvironmentObject private var themeManager: ThemeManager
+
+    let totalSesiones: Int
+    let planName: String
+
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Resumen de práctica")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(themeManager.primaryTextColor)
+                Text("Has completado \(totalSesiones) sesiones con tu \(planName).")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(themeManager.secondaryTextColor)
+            }
+
+            Spacer()
+
+            Image(systemName: "chart.line.uptrend.xyaxis")
+                .font(.system(size: 24, weight: .semibold))
+                .foregroundColor(themeManager.accentColor)
+                .padding(14)
+                .background(themeManager.accentColor.opacity(0.12))
+                .clipShape(Circle())
+        }
+        .padding(18)
+        .background(themeManager.cardColor)
+        .cornerRadius(26)
+        .overlay(
+            RoundedRectangle(cornerRadius: 26)
+                .stroke(themeManager.borderColor, lineWidth: 1)
+        )
     }
 }
 
