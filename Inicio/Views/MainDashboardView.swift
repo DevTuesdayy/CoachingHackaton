@@ -26,15 +26,7 @@ struct MainDashboardView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                ScrollView(showsIndicators: false) {
-                    VStack(spacing: 25) {
-                        headerSection
-                        practiceCardSection
-                        statsSection
-                        weeklyProgressSection
-                    }
-                    .padding(.bottom, 100)
-                }
+                tabContent
 
                 bottomTabBar
             }
@@ -65,6 +57,30 @@ struct MainDashboardView: View {
 }
 
 extension MainDashboardView {
+    @ViewBuilder
+    private var tabContent: some View {
+        switch selectedTab {
+        case .home:
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 25) {
+                    headerSection
+                    practiceCardSection
+                    statsSection
+                    weeklyProgressSection
+                }
+                .padding(.bottom, 100)
+            }
+
+        case .progress:
+            ProgressView()
+
+        case .pro:
+            SubscriptionView()
+
+        case .profile:
+            ProfileView()
+        }
+    }
 
     private var headerSection: some View {
         HStack {
@@ -152,9 +168,9 @@ extension MainDashboardView {
 
     private var statsSection: some View {
         HStack(spacing: 15) {
-            StatCard(value: "12", label: "SESIONES")
+            StatCard(value: "\(viewModel.totalSesiones)", label: "SESIONES")
             StatCard(
-                value: "85",
+                value: "\(viewModel.ultimoScorePromedio)",
                 label: "SCORE PROMEDIO",
                 unit: "/100",
                 valueColor: themeManager.successColor
@@ -172,7 +188,11 @@ extension MainDashboardView {
 
                 Spacer()
 
-                Button("Ver todo >") { }
+                Button("Ver todo >") {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        selectedTab = .progress
+                    }
+                }
                     .font(.system(size: 14))
                     .foregroundColor(themeManager.accentColor)
             }
@@ -223,6 +243,7 @@ extension MainDashboardView {
 
     private func presentarReportePendiente() {
         guard let reportePendiente else { return }
+        viewModel.registrarSesion(reporte: reportePendiente, context: context)
         reporteSesion = reportePendiente
         self.reportePendiente = nil
     }
