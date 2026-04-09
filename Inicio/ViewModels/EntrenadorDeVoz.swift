@@ -5,6 +5,7 @@
 //  Created by Alan Cervantes on 08/04/26.
 //
 
+
 import SwiftUI
 import Combine
 import Speech
@@ -24,7 +25,7 @@ class EntrenadorDeVoz: ObservableObject {
     private let muletillas = [
         "este", "eh", "bueno", "osea", "básicamente",
         "pues", "digamos", "tipo", "entonces", "digo",
-        "literalmente", "obviamente", "mmm", "ah", "claro", "pues"
+        "literalmente", "obviamente", "mmm", "ah", "claro"
     ]
     
     func iniciarGrabacion() {
@@ -42,6 +43,7 @@ class EntrenadorDeVoz: ObservableObject {
         try? sesionDeAudio.setCategory(.record, mode: .measurement, options: .duckOthers)
         try? sesionDeAudio.setActive(true, options: .notifyOthersOnDeactivation)
 
+        //--------------
         
         let nodoEntrada = motorDeAudio.inputNode
         solicitudReconocimiento = SFSpeechAudioBufferRecognitionRequest()
