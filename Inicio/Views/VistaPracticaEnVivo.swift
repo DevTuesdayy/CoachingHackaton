@@ -10,6 +10,7 @@ import Speech
 
 struct VistaPracticaEnVivo: View {
     @ObservedObject var entrenadorVoz: EntrenadorDeVoz
+    @StateObject private var analisisFacial = AnalisisFacial()
     
     @Environment(\.presentationMode) var presentationMode
     
@@ -17,7 +18,12 @@ struct VistaPracticaEnVivo: View {
     
     var body: some View {
         ZStack {
+            #if targetEnvironment(simulator)
             Color(red: 0.1, green: 0.1, blue: 0.15).ignoresSafeArea()
+            #else
+            VistaCamaraAR(session: analisisFacial.arSession)
+                .ignoresSafeArea()
+            #endif
             
             VStack {
                 HStack {
@@ -34,6 +40,7 @@ struct VistaPracticaEnVivo: View {
                     
                     Button(action: {
                         entrenadorVoz.detenerGrabacion()
+                        analisisFacial.detenerAnalisis()
                         presentationMode.wrappedValue.dismiss()
                     }) {
                         Image(systemName: "xmark")
@@ -58,10 +65,10 @@ struct VistaPracticaEnVivo: View {
                     )
                     
                     TarjetaFlotante(
-                        icono: "eye.fill",
-                        colorIcono: .cyan,
+                        icono: analisisFacial.estaMirandoCamara ? "eye.fill" : "eye.slash.fill",
+                        colorIcono: analisisFacial.estaMirandoCamara ? .cyan : .red,
                         titulo: "CONTACTO VISUAL",
-                        valor: "100%"
+                        valor: "\(analisisFacial.contactoVisual)"
                     )
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -117,9 +124,11 @@ struct VistaPracticaEnVivo: View {
     private func alternarGrabacion() {
         if estaGrabando {
             entrenadorVoz.detenerGrabacion()
+            analisisFacial.detenerAnalisis()
             estaGrabando = false
         } else {
             entrenadorVoz.iniciarGrabacion()
+            analisisFacial.iniciarAnalisis()
             estaGrabando = true
         }
     }

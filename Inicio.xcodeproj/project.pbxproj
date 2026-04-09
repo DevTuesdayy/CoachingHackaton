@@ -270,6 +270,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Inicio/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "PitchCoach necesita la cámara para analizar tu contacto visual.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "PitchCoach necesita el micrófono para escucharte practicar";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "PitchCoach necesita analizar tu voz para detectar muletillas.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -305,6 +306,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Inicio/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "PitchCoach necesita la cámara para analizar tu contacto visual.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "PitchCoach necesita el micrófono para escucharte practicar";
 				INFOPLIST_KEY_NSSpeechRecognitionUsageDescription = "PitchCoach necesita analizar tu voz para detectar muletillas.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

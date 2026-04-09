@@ -71,11 +71,11 @@ struct MainDashboardView: View {
                                 Image(systemName: isDarkMode ? "sun.max.fill" : "moon.fill")
                                     .font(.system(size: 18))
                                     .foregroundColor(isDarkMode ? .yellow : .blue)
-                                                                .padding(12)
-                                                                .background(cardColor)
-                                                                .clipShape(Circle())
-                                                                .shadow(color: Color.black.opacity(isDarkMode ? 0 : 0.1), radius: 5)
-                                                        }
+                                    .padding(12)
+                                    .background(cardColor)
+                                    .clipShape(Circle())
+                                    .shadow(color: Color.black.opacity(isDarkMode ? 0 : 0.1), radius: 5)
+                                }
                         }
                         .padding(.horizontal)
                         .padding(.top, 10)
