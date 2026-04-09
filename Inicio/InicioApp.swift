@@ -18,6 +18,6 @@ struct InicioApp: App {
                 .environmentObject(themeManager)
                 .preferredColorScheme(themeManager.isDarkMode ? .dark : .light)
         }
-        .modelContainer(for: Usuario.self)
+        .modelContainer(for: [Usuario.self, SesionPractica.self])
     }
 }
