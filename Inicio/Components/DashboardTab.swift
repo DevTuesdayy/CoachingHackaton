@@ -7,7 +7,7 @@
 
 enum DashboardTab {
     case home
+    case streak
     case progress
-    case pro
     case profile
 }

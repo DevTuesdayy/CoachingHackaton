@@ -148,6 +148,8 @@ struct ProfileView: View {
         .onAppear {
             viewModel.loadCurrentUser(context: context)
         }
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
     }
 }
 

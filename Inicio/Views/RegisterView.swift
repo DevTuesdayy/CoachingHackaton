@@ -116,6 +116,8 @@ struct RegisterView: View {
         .navigationDestination(isPresented: $goToDashboard) {
             MainDashboardView()
         }
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
     }
 }
 

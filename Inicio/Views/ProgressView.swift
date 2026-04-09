@@ -132,6 +132,8 @@ struct ProgressView: View {
         .onAppear {
             viewModel.loadProgress(context: context)
         }
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
     }
 }
 

@@ -28,26 +28,6 @@ struct WelcomeView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 30) {
-                HStack {
-                    Spacer()
-
-                    Button(action: themeManager.toggleTheme) {
-                        Image(systemName: themeManager.isDarkMode ? "sun.max.fill" : "moon.fill")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundColor(themeManager.primaryTextColor)
-                            .frame(width: 48, height: 48)
-                            .background(themeManager.elevatedCardColor)
-                            .clipShape(Circle())
-                            .overlay(
-                                Circle()
-                                    .stroke(themeManager.borderColor, lineWidth: 1)
-                            )
-                    }
-                    .buttonStyle(.plain)
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 12)
-
                 Spacer()
                 
                 ZStack {

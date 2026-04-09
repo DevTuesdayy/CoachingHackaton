@@ -54,6 +54,8 @@ struct MainDashboardView: View {
                 volumenPromedio: reporte.volumenPromedio
             )
         }
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
     }
 }
 
@@ -72,11 +74,20 @@ extension MainDashboardView {
                 .padding(.bottom, 100)
             }
 
+        case .streak:
+            StreakView(
+                streakDays: viewModel.rachaActual,
+                recordDays: viewModel.mejorRacha,
+                confianza: viewModel.confianzaResumen,
+                ritmoVoz: viewModel.ritmoVozResumen,
+                contactoVisual: viewModel.contactoVisualResumen
+            ) {
+                selectedTab = .home
+                mostrarPracticaEnVivo = true
+            }
+
         case .progress:
             ProgressView()
-
-        case .pro:
-            SubscriptionView()
 
         case .profile:
             ProfileView()
@@ -115,9 +126,43 @@ extension MainDashboardView {
             }
 
             Spacer()
+
+            streakButton
         }
         .padding(.horizontal)
         .padding(.top, 10)
+    }
+
+    private var streakButton: some View {
+        ZStack(alignment: .topTrailing) {
+            Button {
+                withAnimation(.easeInOut(duration: 0.2)) {
+                    selectedTab = .streak
+                }
+            } label: {
+                Image(systemName: "flame")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.orange)
+                    .frame(width: 44, height: 44)
+                    .background(
+                        Circle()
+                            .fill(themeManager.cardColor)
+                    )
+                    .overlay(
+                        Circle()
+                            .stroke(themeManager.borderColor, lineWidth: 1)
+                    )
+            }
+            .buttonStyle(.plain)
+
+            Text("\(viewModel.rachaActual)")
+                .font(.system(size: 12, weight: .bold))
+                .foregroundColor(.white)
+                .frame(width: 24, height: 24)
+                .background(Color.orange)
+                .clipShape(Circle())
+                .offset(x: 8, y: -8)
+        }
     }
 
     private var practiceCardSection: some View {

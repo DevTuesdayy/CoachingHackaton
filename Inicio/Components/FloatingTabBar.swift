@@ -28,9 +28,9 @@ struct FloatingTabBar: View {
         HStack {
             tabButton(icon: "house.fill", label: "Inicio", tab: .home)
             Spacer()
-            tabButton(icon: "chart.bar.fill", label: "Progreso", tab: .progress)
+            tabButton(icon: "flame.fill", label: "Racha", tab: .streak)
             Spacer()
-            tabButton(icon: "creditcard.fill", label: "Pro", tab: .pro)
+            tabButton(icon: "chart.bar.fill", label: "Progreso", tab: .progress)
             Spacer()
             tabButton(icon: "person.fill", label: "Perfil", tab: .profile)
         }

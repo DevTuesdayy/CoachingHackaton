@@ -67,8 +67,6 @@ struct FinalAnalysisView: View {
                     .padding(.bottom, 30)
                 }
             }
-
-            floatingThemeButton
         }
         .task {
             guard generadorReportes.analisisGenerado == nil, generadorReportes.mensajeError == nil else { return }
@@ -80,6 +78,8 @@ struct FinalAnalysisView: View {
                 volumenPromedio: volumenPromedio
             )
         }
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
     }
 }
 
@@ -104,21 +104,9 @@ extension FinalAnalysisView {
 
     private var headerSection: some View {
         HStack {
-            CircleIconButton(systemName: "chevron.left") {
-                dismiss()
-            }
-
-            Spacer()
-
             Text("Análisis Final")
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(primaryTextColor)
-
-            Spacer()
-
-            CircleIconButton(systemName: "square.and.arrow.up") {
-                // compartir
-            }
         }
         .padding(.horizontal, 22)
         .padding(.top, 20)
@@ -258,36 +246,6 @@ extension FinalAnalysisView {
             .shadow(color: themeManager.accentColor.opacity(0.22), radius: 18, y: 8)
         }
         .buttonStyle(.plain)
-    }
-
-    private var floatingThemeButton: some View {
-        VStack {
-            Spacer()
-
-            HStack {
-                Spacer()
-
-                Button {
-                    themeManager.toggleTheme()
-                } label: {
-                    Image(systemName: themeManager.isDarkMode ? "sun.max" : "moon.fill")
-                        .font(.system(size: 22, weight: .medium))
-                        .foregroundColor(themeManager.isDarkMode ? themeManager.primaryTextColor.opacity(0.9) : themeManager.accentSecondaryColor)
-                        .frame(width: 76, height: 76)
-                        .background(
-                            Circle()
-                                .fill(themeManager.elevatedCardColor)
-                        )
-                        .overlay(
-                            Circle()
-                                .stroke(borderColor, lineWidth: 1)
-                        )
-                }
-                .buttonStyle(.plain)
-                .padding(.trailing, 18)
-                .padding(.bottom, 150)
-            }
-        }
     }
 
     private var cardBackground: Color {

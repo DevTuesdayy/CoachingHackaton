@@ -36,8 +36,10 @@ final class LoginViewModel: ObservableObject {
                     && $0.password == password
             }
 
-            if usuario != nil {
-                UserDefaults.standard.set(email, forKey: "currentUserEmail")
+            if let usuario {
+                usuario.registrarIngreso()
+                try context.save()
+                UserDefaults.standard.set(usuario.email, forKey: "currentUserEmail")
                 successMessage = "Inicio de sesión correcto."
             } else {
                 errorMessage = "Correo o contraseña incorrectos."

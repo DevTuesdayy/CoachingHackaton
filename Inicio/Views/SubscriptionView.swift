@@ -19,21 +19,10 @@ struct SubscriptionView: View {
                     
                     // --- HEADER ---
                     HStack {
-                        Button(action: { /* Acción volver */ }) {
-                            Image(systemName: "chevron.left")
-                                .font(.title3)
-                                .foregroundColor(themeManager.primaryTextColor)
-                                .padding(12)
-                                .background(themeManager.elevatedCardColor)
-                                .clipShape(Circle())
-                        }
-                        Spacer()
                         Text("Planes")
                             .font(.headline)
                             .foregroundColor(themeManager.primaryTextColor)
                         Spacer()
-                        // Espaciador para centrar el título
-                        Color.clear.frame(width: 44, height: 44)
                     }
                     .padding(.horizontal)
                     
@@ -102,6 +91,8 @@ struct SubscriptionView: View {
                 .padding(.bottom, 120)
             }
         }
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
     }
 }
 

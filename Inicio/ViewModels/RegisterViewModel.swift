@@ -47,6 +47,7 @@ final class RegisterViewModel: ObservableObject {
                 email: email,
                 password: password
             )
+            nuevoUsuario.registrarIngreso()
 
             context.insert(nuevoUsuario)
             try context.save()
