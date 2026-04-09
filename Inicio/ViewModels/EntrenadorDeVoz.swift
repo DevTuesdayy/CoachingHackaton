@@ -14,12 +14,17 @@ import AVFoundation
 class EntrenadorDeVoz: ObservableObject {
     @Published var textoEscuchado = "Presiona iniciar y comienza a hablar..."
     @Published var contadorMuletillas = 0
+    @Published var nivelVolumenActual: Double = 0
+    @Published var volumenPromedio: Double = 0
     
     private var reconocedor = SFSpeechRecognizer(locale: Locale(identifier: "es-MX"))
     private var solicitudReconocimiento: SFSpeechAudioBufferRecognitionRequest?
     private var tareaReconocimiento: SFSpeechRecognitionTask?
     private let motorDeAudio = AVAudioEngine()
     private var temporizadorSimulado: Timer?
+    private var sumaVolumen: Double = 0
+    private var muestrasVolumen: Int = 0
+    private var muestrasVolumenActivas: Int = 0
     
     // lista de mulettilas
     private let muletillas = [
@@ -33,6 +38,11 @@ class EntrenadorDeVoz: ObservableObject {
 
         contadorMuletillas = 0
         textoEscuchado = "Escuchando..."
+        nivelVolumenActual = 0
+        volumenPromedio = 0
+        sumaVolumen = 0
+        muestrasVolumen = 0
+        muestrasVolumenActivas = 0
 
         if ProcessInfo.processInfo.environment["SIMULATOR_DEVICE_NAME"] != nil {
             iniciarSimulacion()
@@ -77,6 +87,7 @@ class EntrenadorDeVoz: ObservableObject {
         nodoEntrada.removeTap(onBus: 0)
         nodoEntrada.installTap(onBus: 0, bufferSize: 1024, format: nil) { buffer, _ in
             self.solicitudReconocimiento?.append(buffer)
+            self.actualizarVolumen(with: buffer)
         }
         
         motorDeAudio.prepare()
@@ -91,6 +102,7 @@ class EntrenadorDeVoz: ObservableObject {
     func detenerGrabacion() {
         temporizadorSimulado?.invalidate()
         temporizadorSimulado = nil
+        nivelVolumenActual = 0
 
         if motorDeAudio.isRunning {
             motorDeAudio.stop()
@@ -120,6 +132,8 @@ class EntrenadorDeVoz: ObservableObject {
         var indice = 0
         textoEscuchado = muestras[0]
         contarMuletillas(en: muestras[0])
+        let volumenesSimulados: [Double] = [0.22, 0.38, 0.31, 0.44, 0.57, 0.49, 0.63, 0.53, 0.41]
+        registrarVolumen(volumenesSimulados[0])
 
         temporizadorSimulado = Timer.scheduledTimer(withTimeInterval: 1.4, repeats: true) { [weak self] timer in
             guard let self else {
@@ -136,6 +150,7 @@ class EntrenadorDeVoz: ObservableObject {
 
             self.textoEscuchado = muestras[0...indice].joined(separator: " ")
             self.contarMuletillas(en: self.textoEscuchado)
+            self.registrarVolumen(volumenesSimulados[min(indice, volumenesSimulados.count - 1)])
         }
     }
     
@@ -154,5 +169,53 @@ class EntrenadorDeVoz: ObservableObject {
             .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "es-MX"))
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
-}
 
+    private func actualizarVolumen(with buffer: AVAudioPCMBuffer) {
+        guard let channelData = buffer.floatChannelData else { return }
+        let frameLength = Int(buffer.frameLength)
+        guard frameLength > 0 else { return }
+
+        let samples = Array(UnsafeBufferPointer(start: channelData[0], count: frameLength))
+        let rms = sqrt(samples.reduce(0) { $0 + Double($1 * $1) } / Double(frameLength))
+        let peak = samples.reduce(0.0) { max($0, Double(abs($1))) }
+        let safeRMS = max(rms, 0.000_01)
+        let safePeak = max(peak, 0.000_01)
+        let averagePower = 20 * log10(safeRMS)
+        let peakPower = 20 * log10(safePeak)
+        let blendedPower = (averagePower * 0.55) + (peakPower * 0.45)
+        let minDb = -65.0
+        let linearLevel = min(max((blendedPower - minDb) / abs(minDb), 0), 1)
+        let boostedLevel = pow(linearLevel, 0.55)
+        let normalizedLevel = min(max(boostedLevel * 1.18, 0), 1)
+
+        DispatchQueue.main.async {
+            self.registrarVolumen(normalizedLevel)
+        }
+    }
+
+    private func registrarVolumen(_ nivel: Double) {
+        nivelVolumenActual = (nivelVolumenActual * 0.25) + (nivel * 0.75)
+        muestrasVolumen += 1
+
+        if nivel > 0.04 {
+            sumaVolumen += nivel
+            muestrasVolumenActivas += 1
+        }
+
+        let divisor = max(muestrasVolumenActivas, 1)
+        volumenPromedio = sumaVolumen / Double(divisor)
+    }
+
+    var intensidadVozDescripcion: String {
+        switch volumenPromedio {
+        case 0.82...:
+            "Fuerte"
+        case 0.55..<0.82:
+            "Óptimo"
+        case 0.28..<0.55:
+            "Bajo"
+        default:
+            "Muy bajo"
+        }
+    }
+}

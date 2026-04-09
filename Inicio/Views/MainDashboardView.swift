@@ -58,7 +58,8 @@ struct MainDashboardView: View {
                 contactoVisual: reporte.contactoVisual,
                 muletillas: reporte.muletillas,
                 textoUsuario: reporte.textoUsuario,
-                duracionSegundos: reporte.duracionSegundos
+                duracionSegundos: reporte.duracionSegundos,
+                volumenPromedio: reporte.volumenPromedio
             )
         }
     }

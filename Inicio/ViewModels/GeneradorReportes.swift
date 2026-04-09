@@ -38,7 +38,8 @@ final class GeneradorReportes: ObservableObject {
         contactoVisual: Int,
         muletillas: Int,
         textoUsuario: String,
-        duracionSegundos: Int
+        duracionSegundos: Int,
+        volumenPromedio: Double
     ) async {
         estaGenerando = true
         mensajeError = nil
@@ -51,7 +52,7 @@ final class GeneradorReportes: ObservableObject {
         Genera exactamente 3 insights breves.
         Genera exactamente 6 puntos para timelineChart distribuidos entre 0:00 y la duracion real de la sesion.
         Genera exactamente 3 eventos para timelineEvents con momentos importantes del pitch.
-        Los scores y eventos deben ser consistentes con el contacto visual, las muletillas y el contenido del pitch.
+        Los scores y eventos deben ser consistentes con el contacto visual, las muletillas, el volumen de voz y el contenido del pitch.
         Nunca inventes tiempos fuera de la duracion real.
         """
 
@@ -60,6 +61,7 @@ final class GeneradorReportes: ObservableObject {
         - Contacto Visual: \(contactoVisual)%
         - Muletillas detectadas: \(muletillas)
         - Duración total: \(duracionSegundos) segundos
+        - Volumen promedio de voz: \(Int(volumenPromedio * 100))%
         - Transcripción del pitch: "\(textoUsuario)"
         """
 

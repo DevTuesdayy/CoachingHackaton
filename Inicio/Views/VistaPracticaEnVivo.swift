@@ -61,7 +61,6 @@ struct VistaPracticaEnVivo: View {
                 Spacer()
 
                 VStack(spacing: 15) {
-                    
                     TarjetaFlotante(
                         icono: "exclamationmark.circle.fill",
                         colorIcono: entrenadorVoz.contadorMuletillas > 3 ? themeManager.dangerColor : .purple,
@@ -74,6 +73,13 @@ struct VistaPracticaEnVivo: View {
                         colorIcono: analisisFacial.estaMirandoCamara ? themeManager.accentColor : themeManager.dangerColor,
                         titulo: "CONTACTO VISUAL",
                         valor: "\(analisisFacial.contactoVisual)"
+                    )
+
+                    TarjetaFlotante(
+                        icono: "waveform",
+                        colorIcono: colorVolumen,
+                        titulo: "VOLUMEN",
+                        valor: "\(entrenadorVoz.intensidadVozDescripcion) · \(Int(entrenadorVoz.volumenPromedio * 100))%"
                     )
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -104,7 +110,10 @@ struct VistaPracticaEnVivo: View {
                 .cornerRadius(20)
                 .padding(.horizontal, 30)
                 .padding(.bottom, 30)
-                
+
+                liveFeedbackBanner
+                    .padding(.bottom, 22)
+
                 Button(action: alternarGrabacion) {
                     ZStack {
                         Circle()
@@ -146,7 +155,8 @@ struct VistaPracticaEnVivo: View {
             contactoVisual: analisisFacial.contactoVisual,
             muletillas: entrenadorVoz.contadorMuletillas,
             textoUsuario: entrenadorVoz.textoEscuchado,
-            duracionSegundos: duracionSesion
+            duracionSegundos: duracionSesion,
+            volumenPromedio: entrenadorVoz.volumenPromedio
         )
 
         presentationMode.wrappedValue.dismiss()
@@ -161,6 +171,114 @@ struct VistaPracticaEnVivo: View {
     private func solicitarPermisos() {
         SFSpeechRecognizer.requestAuthorization { status in
         }
+    }
+
+    private var liveFeedbackBanner: some View {
+        HStack(spacing: 10) {
+            Image(systemName: feedbackIcon)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(feedbackColor)
+
+            Text(liveFeedbackMessage)
+                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .foregroundColor(themeManager.primaryTextColor)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
+        }
+        .padding(.horizontal, 18)
+        .padding(.vertical, 12)
+        .background(themeManager.overlayColor.opacity(0.95))
+        .overlay(
+            Capsule(style: .continuous)
+                .stroke(feedbackColor.opacity(0.35), lineWidth: 1.2)
+        )
+        .clipShape(Capsule(style: .continuous))
+        .shadow(color: feedbackColor.opacity(0.18), radius: 16, y: 6)
+        .padding(.horizontal, 36)
+    }
+
+    private var colorVolumen: Color {
+        switch entrenadorVoz.volumenPromedio {
+        case 0.65...:
+            themeManager.warningColor
+        case 0.35..<0.65:
+            themeManager.successColor
+        default:
+            themeManager.accentColor
+        }
+    }
+
+    private var palabrasPorMinuto: Int {
+        let palabras = entrenadorVoz.textoEscuchado
+            .components(separatedBy: CharacterSet.whitespacesAndNewlines.union(.punctuationCharacters))
+            .filter { !$0.isEmpty }
+
+        let minutos = max(Double(duracionSesion) / 60.0, 1.0 / 60.0)
+        return Int(round(Double(palabras.count) / minutos))
+    }
+
+    private var liveFeedbackMessage: String {
+        guard estaGrabando else {
+            return "Presiona grabar para comenzar tu práctica"
+        }
+
+        if palabrasPorMinuto > 165 {
+            return "Habla más despacio para que tu mensaje se entienda mejor"
+        }
+
+        if palabrasPorMinuto < 95 && duracionSesion > 8 {
+            return "Puedes acelerar un poco el ritmo para sonar más seguro"
+        }
+
+        if entrenadorVoz.volumenPromedio < 0.32 {
+            return "Habla más fuerte para proyectar mejor tu voz"
+        }
+
+        if entrenadorVoz.volumenPromedio > 0.88 {
+            return "Baja un poco el volumen para sonar más controlado"
+        }
+
+        if analisisFacial.contactoVisual < 65 {
+            return "Mira más al frente para fortalecer el contacto visual"
+        }
+
+        if entrenadorVoz.contadorMuletillas >= 4 {
+            return "Haz una pausa corta antes de seguir para reducir muletillas"
+        }
+
+        return "Buen ritmo, mantén esa energía"
+    }
+
+    private var feedbackColor: Color {
+        if palabrasPorMinuto > 165 || entrenadorVoz.volumenPromedio < 0.32 || analisisFacial.contactoVisual < 65 {
+            return themeManager.warningColor
+        }
+
+        if entrenadorVoz.contadorMuletillas >= 4 {
+            return themeManager.dangerColor
+        }
+
+        return themeManager.accentColor
+    }
+
+    private var feedbackIcon: String {
+        if palabrasPorMinuto > 165 || palabrasPorMinuto < 95 {
+            return "metronome"
+        }
+
+        if entrenadorVoz.volumenPromedio < 0.32 || entrenadorVoz.volumenPromedio > 0.88 {
+            return "speaker.wave.2.fill"
+        }
+
+        if analisisFacial.contactoVisual < 65 {
+            return "eye.fill"
+        }
+
+        if entrenadorVoz.contadorMuletillas >= 4 {
+            return "exclamationmark.bubble.fill"
+        }
+
+        return "waveform.path.ecg"
     }
 }
 

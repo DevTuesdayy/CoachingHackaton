@@ -13,4 +13,5 @@ struct ReporteSesion: Identifiable {
     let muletillas: Int
     let textoUsuario: String
     let duracionSegundos: Int
+    let volumenPromedio: Double
 }

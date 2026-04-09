@@ -18,6 +18,7 @@ struct FinalAnalysisView: View {
     let muletillas: Int
     let textoUsuario: String
     let duracionSegundos: Int
+    let volumenPromedio: Double
 
     private var score: Int {
         max(0, min(100, contactoVisual - (muletillas * 3)))
@@ -70,7 +71,8 @@ struct FinalAnalysisView: View {
                 contactoVisual: contactoVisual,
                 muletillas: muletillas,
                 textoUsuario: textoUsuario,
-                duracionSegundos: duracionSegundos
+                duracionSegundos: duracionSegundos,
+                volumenPromedio: volumenPromedio
             )
         }
     }
@@ -310,7 +312,7 @@ extension FinalAnalysisView {
         [
             "Mantienes un contacto visual de \(contactoVisual)%, lo que da una buena base de presencia.",
             "Se detectaron \(muletillas) muletillas durante la sesión; conviene reducirlas para sonar más preciso.",
-            "Refuerza tu cierre con frases más directas y pausas más controladas."
+            "Tu volumen promedio fue \(Int(volumenPromedio * 100))%, así que conviene mantener una proyección estable y clara."
         ]
     }
 
@@ -398,7 +400,11 @@ private struct InsightItem {
         contactoVisual: 82,
         muletillas: 3,
         textoUsuario: "Quiero presentar una app que ayuda a practicar pitches con feedback en tiempo real.",
-        duracionSegundos: 97
+        duracionSegundos: 97,
+        volumenPromedio: 0.46
     )
     .environmentObject(ThemeManager())
 }
+
+
+//Enfoques vender y exponer
