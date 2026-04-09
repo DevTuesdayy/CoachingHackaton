@@ -115,7 +115,7 @@ extension MainDashboardView {
         .padding(.horizontal)
         .padding(.top, 10)
     }
-
+ 
     private var practiceCardSection: some View {
         VStack(spacing: 15) {
             ZStack {

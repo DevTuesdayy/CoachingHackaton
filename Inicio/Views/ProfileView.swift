@@ -13,10 +13,10 @@ struct ProfileView: View {
             // Fondo oscuro consistente
             Color(red: 0.02, green: 0.05, blue: 0.12)
                 .ignoresSafeArea()
-            
+
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 25) {
-                    
+
                     // --- HEADER CON SETTINGS ---
                     HStack {
                         Text("Mi Perfil")
@@ -29,18 +29,20 @@ struct ProfileView: View {
                     }
                     .padding(.horizontal)
                     .padding(.top, 20)
-                    
+
                     // --- TARJETA DE PERFIL PRINCIPAL ---
                     VStack(spacing: 15) {
                         // Foto de Perfil con el icono de cámara
                         ZStack(alignment: .bottomTrailing) {
-                            Image("user_profile") // Asegúrate de tener una imagen en Assets o usa person.circle.fill
+                            Image("user_profile")  // Asegúrate de tener una imagen en Assets o usa person.circle.fill
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
                                 .frame(width: 110, height: 110)
                                 .clipShape(Circle())
-                                .overlay(Circle().stroke(Color.cyan, lineWidth: 2))
-                            
+                                .overlay(
+                                    Circle().stroke(Color.cyan, lineWidth: 2)
+                                )
+
                             // Botón de editar foto
                             ZStack {
                                 Circle()
@@ -52,7 +54,7 @@ struct ProfileView: View {
                             }
                             .offset(x: 2, y: 2)
                         }
-                        
+
                         VStack(spacing: 4) {
                             Text("Sofia M.")
                                 .font(.title2)
@@ -62,7 +64,7 @@ struct ProfileView: View {
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                         }
-                        
+
                         // Etiqueta Plan Pro con Gradiente
                         HStack(spacing: 8) {
                             Image(systemName: "creditcard.fill")
@@ -74,7 +76,11 @@ struct ProfileView: View {
                         .padding(.horizontal, 20)
                         .padding(.vertical, 10)
                         .background(
-                            LinearGradient(colors: [Color.blue, Color.cyan], startPoint: .leading, endPoint: .trailing)
+                            LinearGradient(
+                                colors: [Color.blue, Color.cyan],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
                         )
                         .cornerRadius(20)
                     }
@@ -82,25 +88,52 @@ struct ProfileView: View {
                     .padding(.vertical, 30)
                     .background(Color.white.opacity(0.05))
                     .cornerRadius(30)
-                    .overlay(RoundedRectangle(cornerRadius: 30).stroke(Color.white.opacity(0.1), lineWidth: 1))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 30).stroke(
+                            Color.white.opacity(0.1),
+                            lineWidth: 1
+                        )
+                    )
                     .padding(.horizontal)
-                    
+
                     // --- LISTA DE OPCIONES ---
                     VStack(spacing: 12) {
-                        ProfileOptionRow(icon: "mic.fill", title: "Audio y Micrófono", subtitle: "Dispositivos por defecto")
-                        ProfileOptionRow(icon: "camera.fill", title: "Cámara y Video", subtitle: "Preferencias de grabación")
-                        ProfileOptionRow(icon: "bell.fill", title: "Notificaciones", subtitle: "Alertas y recordatorios")
-                        ProfileOptionRow(icon: "creditcard.fill", title: "Facturación", subtitle: "Plan actual: Pro")
-                        ProfileOptionRow(icon: "shield.fill", title: "Privacidad", subtitle: "Tus datos")
+                        ProfileOptionRow(
+                            icon: "mic.fill",
+                            title: "Audio y Micrófono",
+                            subtitle: "Dispositivos por defecto"
+                        )
+                        ProfileOptionRow(
+                            icon: "camera.fill",
+                            title: "Cámara y Video",
+                            subtitle: "Preferencias de grabación"
+                        )
+                        ProfileOptionRow(
+                            icon: "bell.fill",
+                            title: "Notificaciones",
+                            subtitle: "Alertas y recordatorios"
+                        )
+                        ProfileOptionRow(
+                            icon: "creditcard.fill",
+                            title: "Facturación",
+                            subtitle: "Plan actual: Pro"
+                        )
+                        ProfileOptionRow(
+                            icon: "shield.fill",
+                            title: "Privacidad",
+                            subtitle: "Tus datos"
+                        )
                     }
                     .padding(.horizontal)
-                    
+
                     // --- BOTÓN CERRAR SESIÓN ---
                     Button(action: {
                         print("Cerrar sesión")
                     }) {
                         HStack {
-                            Image(systemName: "rectangle.portrait.and.arrow.right")
+                            Image(
+                                systemName: "rectangle.portrait.and.arrow.right"
+                            )
                             Text("Cerrar Sesión")
                                 .fontWeight(.semibold)
                         }
@@ -109,12 +142,17 @@ struct ProfileView: View {
                         .padding(.vertical, 18)
                         .background(Color.red.opacity(0.1))
                         .cornerRadius(20)
-                        .overlay(RoundedRectangle(cornerRadius: 20).stroke(Color.red.opacity(0.2), lineWidth: 1))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20).stroke(
+                                Color.red.opacity(0.2),
+                                lineWidth: 1
+                            )
+                        )
                     }
                     .padding(.horizontal)
                     .padding(.top, 10)
                 }
-                .padding(.bottom, 120) // Espacio para el Tab Bar
+                .padding(.bottom, 120)  // Espacio para el Tab Bar
             }
         }
     }
@@ -125,7 +163,7 @@ struct ProfileOptionRow: View {
     let icon: String
     let title: String
     let subtitle: String
-    
+
     var body: some View {
         HStack(spacing: 15) {
             // Icono con fondo circular tenue
@@ -137,7 +175,7 @@ struct ProfileOptionRow: View {
                     .foregroundColor(.gray)
                     .font(.system(size: 18))
             }
-            
+
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.system(size: 16, weight: .semibold))
@@ -146,9 +184,9 @@ struct ProfileOptionRow: View {
                     .font(.system(size: 12))
                     .foregroundColor(.gray)
             }
-            
+
             Spacer()
-            
+
             Image(systemName: "chevron.right")
                 .font(.system(size: 14, weight: .bold))
                 .foregroundColor(.white.opacity(0.2))
@@ -157,7 +195,12 @@ struct ProfileOptionRow: View {
         .padding(.vertical, 15)
         .background(Color.white.opacity(0.05))
         .cornerRadius(25)
-        .overlay(RoundedRectangle(cornerRadius: 25).stroke(Color.white.opacity(0.05), lineWidth: 1))
+        .overlay(
+            RoundedRectangle(cornerRadius: 25).stroke(
+                Color.white.opacity(0.05),
+                lineWidth: 1
+            )
+        )
     }
 }
 
