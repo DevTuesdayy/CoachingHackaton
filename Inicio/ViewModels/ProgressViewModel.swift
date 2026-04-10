@@ -18,6 +18,7 @@ struct ScoreData: Identifiable {
 struct Session: Identifiable {
     let id: PersistentIdentifier
     let title: String
+    let mode: String
     let date: String
     let duration: String
     let score: Int
@@ -77,6 +78,7 @@ final class ProgressViewModel: ObservableObject {
             Session(
                 id: sesion.persistentModelID,
                 title: sesion.temaPrincipal,
+                mode: sesion.modoPitch,
                 date: formattedDate(sesion.fecha),
                 duration: formattedDuration(seconds: sesion.duracionSegundos),
                 score: sesion.scorePromedio

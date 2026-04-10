@@ -23,8 +23,10 @@ final class MainDashboardViewModel: ObservableObject {
     @Published var contactoVisualResumen: Int = 0
 
     func loadCurrentUser(context: ModelContext) {
+        let storedUsername = UserDefaults.standard.string(forKey: "currentUsername")
+
         guard let storedEmail = UserDefaults.standard.string(forKey: "currentUserEmail") else {
-            username = "Usuario"
+            username = storedUsername ?? "Usuario"
             totalSesiones = 0
             ultimoScorePromedio = 0
             rachaActual = 0
@@ -51,8 +53,9 @@ final class MainDashboardViewModel: ObservableObject {
                 rachaActual = usuario.rachaActual
                 mejorRacha = usuario.mejorRacha
                 UserDefaults.standard.set(normalized(usuario.email), forKey: "currentUserEmail")
+                UserDefaults.standard.set(usuario.username, forKey: "currentUsername")
             } else {
-                username = "Usuario"
+                username = storedUsername ?? "Usuario"
                 rachaActual = 0
                 mejorRacha = 0
             }
@@ -61,7 +64,7 @@ final class MainDashboardViewModel: ObservableObject {
             ultimoScorePromedio = sesiones.first?.scorePromedio ?? 0
             applySummaryMetrics(from: sesiones.first)
         } catch {
-            username = "Usuario"
+            username = storedUsername ?? "Usuario"
             totalSesiones = 0
             ultimoScorePromedio = 0
             rachaActual = 0
@@ -89,6 +92,7 @@ final class MainDashboardViewModel: ObservableObject {
         )
         let sesion = SesionPractica(
             userEmail: currentEmail,
+            modoPitch: reporte.modoPitch.displayName,
             duracionSegundos: reporte.duracionSegundos,
             contactoVisual: reporte.contactoVisual,
             muletillas: reporte.muletillas,

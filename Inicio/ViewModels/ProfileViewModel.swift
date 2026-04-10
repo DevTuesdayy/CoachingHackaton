@@ -19,8 +19,10 @@ final class ProfileViewModel: ObservableObject {
     @Published var claridadPromedio: Int = 0
     
     func loadCurrentUser(context: ModelContext) {
+        let storedUsername = UserDefaults.standard.string(forKey: "currentUsername")
+
         guard let storedEmail = UserDefaults.standard.string(forKey: "currentUserEmail") else {
-            username = "Usuario"
+            username = storedUsername ?? "Usuario"
             email = "correo@ejemplo.com"
             totalSesiones = 0
             mejorScore = 0
@@ -44,8 +46,9 @@ final class ProfileViewModel: ObservableObject {
             }) {
                 username = usuario.username
                 email = usuario.email
+                UserDefaults.standard.set(usuario.username, forKey: "currentUsername")
             } else {
-                username = "Usuario"
+                username = storedUsername ?? "Usuario"
                 email = "correo@ejemplo.com"
             }
 
@@ -55,7 +58,7 @@ final class ProfileViewModel: ObservableObject {
                 ? 0
                 : Int(round(sesiones.map { Double($0.contactoVisual) }.reduce(0, +) / Double(sesiones.count)))
         } catch {
-            username = "Usuario"
+            username = storedUsername ?? "Usuario"
             email = "correo@ejemplo.com"
             totalSesiones = 0
             mejorScore = 0

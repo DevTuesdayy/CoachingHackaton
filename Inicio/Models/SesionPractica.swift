@@ -11,6 +11,7 @@ import SwiftData
 @Model
 final class SesionPractica {
     var userEmail: String
+    var modoPitch: String
     var fecha: Date
     var duracionSegundos: Int
     var contactoVisual: Int
@@ -22,6 +23,7 @@ final class SesionPractica {
 
     init(
         userEmail: String,
+        modoPitch: String,
         fecha: Date = .now,
         duracionSegundos: Int,
         contactoVisual: Int,
@@ -32,6 +34,7 @@ final class SesionPractica {
         scorePromedio: Int
     ) {
         self.userEmail = userEmail
+        self.modoPitch = modoPitch
         self.fecha = fecha
         self.duracionSegundos = duracionSegundos
         self.contactoVisual = contactoVisual

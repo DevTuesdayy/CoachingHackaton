@@ -41,6 +41,7 @@ final class GeneradorReportes: ObservableObject {
 
     func generarReporte(
         idioma: IdiomaPractica,
+        modoPitch: ModoPitch,
         contactoVisual: Int,
         muletillas: Int,
         textoUsuario: String,
@@ -53,8 +54,10 @@ final class GeneradorReportes: ObservableObject {
 
         let instrucciones = """
         Eres 'PitchCoach', un coach ejecutivo estricto pero constructivo.
-        Analiza las métricas y la transcripción del usuario.
+        Analiza las métricas y la transcripción del usuario según el contexto del speech.
         Responde en \(idioma == .espanol ? "español" : "inglés") con una estructura coherente y realista.
+        El modo del speech es \(modoPitch.displayName).
+        Criterios del modo: \(modoPitch.guidance)
         Genera exactamente 3 insights breves.
         Genera exactamente 6 puntos para timelineChart distribuidos entre 0:00 y la duracion real de la sesion.
         Genera exactamente 3 eventos para timelineEvents con momentos importantes del pitch.
@@ -64,6 +67,7 @@ final class GeneradorReportes: ObservableObject {
 
         let contexto = """
         Métricas de esta sesión:
+        - Tipo de práctica: \(modoPitch.displayName)
         - Contacto Visual: \(contactoVisual)%
         - Muletillas detectadas: \(muletillas)
         - Duración total: \(duracionSegundos) segundos

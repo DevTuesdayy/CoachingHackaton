@@ -240,6 +240,14 @@ struct SessionRowView: View {
                 Text(session.title)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundColor(themeManager.primaryTextColor)
+
+                Text(session.mode)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundColor(themeManager.accentColor)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 5)
+                    .background(themeManager.accentColor.opacity(0.12))
+                    .clipShape(Capsule(style: .continuous))
                 
                 HStack(spacing: 12) {
                     Label(session.date, systemImage: "calendar")

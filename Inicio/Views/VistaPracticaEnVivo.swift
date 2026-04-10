@@ -14,6 +14,7 @@ struct VistaPracticaEnVivo: View {
     @ObservedObject var entrenadorVoz: EntrenadorDeVoz
     @StateObject private var analisisFacial = AnalisisFacial()
 
+    let modoPitch: ModoPitch
     let onFinalizarSesion: (ReporteSesion) -> Void
 
     @Environment(\.presentationMode) var presentationMode
@@ -153,6 +154,7 @@ struct VistaPracticaEnVivo: View {
 
         let reporte = ReporteSesion(
             idioma: entrenadorVoz.idiomaSeleccionado,
+            modoPitch: modoPitch,
             contactoVisual: analisisFacial.contactoVisual,
             muletillas: entrenadorVoz.contadorMuletillas,
             textoUsuario: entrenadorVoz.textoEscuchado,
@@ -220,7 +222,26 @@ struct VistaPracticaEnVivo: View {
 
     private var liveFeedbackMessage: String {
         guard estaGrabando else {
-            return "Presiona grabar para comenzar tu práctica"
+            return modoPitch.practicePrompt
+        }
+
+        switch modoPitch {
+        case .clase:
+            if palabrasPorMinuto > 155 {
+                return "Explica un poco más despacio para que sea más fácil de seguir"
+            }
+        case .ventas:
+            if palabrasPorMinuto < 105 && duracionSesion > 8 {
+                return "Sube un poco la energía para que tu pitch venda mejor"
+            }
+        case .elevador:
+            if palabrasPorMinuto < 110 && duracionSesion > 8 {
+                return "Hazlo más compacto; en un elevator pitch cada segundo cuenta"
+            }
+        case .startup:
+            if palabrasPorMinuto > 160 {
+                return "Reduce el ritmo para que problema y solución se entiendan mejor"
+            }
         }
 
         if palabrasPorMinuto > 165 {
@@ -247,7 +268,16 @@ struct VistaPracticaEnVivo: View {
             return "Haz una pausa corta antes de seguir para reducir muletillas"
         }
 
-        return "Buen ritmo, mantén esa energía"
+        switch modoPitch {
+        case .ventas:
+            return "Buena energía, cierra con una propuesta de valor clara"
+        case .elevador:
+            return "Buen ritmo, mantén el mensaje corto y memorable"
+        case .clase:
+            return "Buen ritmo, sigue explicando con claridad"
+        case .startup:
+            return "Buen ritmo, refuerza problema y solución con seguridad"
+        }
     }
 
     private var feedbackColor: Color {
@@ -320,6 +350,7 @@ struct TarjetaFlotante: View {
 #Preview {
     VistaPracticaEnVivo(
         entrenadorVoz: EntrenadorDeVoz(),
+        modoPitch: .startup,
         onFinalizarSesion: { _ in }
     )
     .environmentObject(ThemeManager())

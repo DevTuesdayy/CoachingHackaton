@@ -16,6 +16,7 @@ struct MainDashboardView: View {
     @State private var reportePendiente: ReporteSesion?
     @State private var reporteSesion: ReporteSesion?
     @State private var selectedTab: DashboardTab = .home
+    @State private var selectedPitchMode: ModoPitch = .startup
 
     @Environment(\.modelContext) private var context
     @StateObject private var viewModel = MainDashboardViewModel()
@@ -40,6 +41,7 @@ struct MainDashboardView: View {
         ) {
             VistaPracticaEnVivo(
                 entrenadorVoz: entrenadorVoz,
+                modoPitch: selectedPitchMode,
                 onFinalizarSesion: { reporte in
                     reportePendiente = reporte
                 }
@@ -48,6 +50,7 @@ struct MainDashboardView: View {
         .fullScreenCover(item: $reporteSesion) { reporte in
             FinalAnalysisView(
                 idioma: reporte.idioma,
+                modoPitch: reporte.modoPitch,
                 contactoVisual: reporte.contactoVisual,
                 muletillas: reporte.muletillas,
                 textoUsuario: reporte.textoUsuario,
@@ -187,6 +190,7 @@ extension MainDashboardView {
                 .font(.subheadline)
                 .foregroundColor(themeManager.secondaryTextColor)
 
+            pitchModeSelector
             languageSelector
         }
         .frame(maxWidth: .infinity)
@@ -237,6 +241,45 @@ extension MainDashboardView {
             }
         }
         .padding(.top, 4)
+    }
+
+    private var pitchModeSelector: some View {
+        VStack(spacing: 10) {
+            Text("Modo Pitch")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(themeManager.secondaryTextColor)
+
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+                ForEach(ModoPitch.allCases) { modo in
+                    let isSelected = selectedPitchMode == modo
+
+                    Button {
+                        selectedPitchMode = modo
+                    } label: {
+                        Text(modo.displayName)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(isSelected ? .white : themeManager.primaryTextColor)
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 10)
+                            .background(
+                                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                    .fill(isSelected ? themeManager.accentColor : themeManager.elevatedCardColor)
+                            )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 16)
+
+            Text(selectedPitchMode.practicePrompt)
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(themeManager.secondaryTextColor)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
+                .padding(.top, 2)
+        }
+        .padding(.top, 2)
     }
 
     private var statsSection: some View {

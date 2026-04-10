@@ -8,9 +8,15 @@
 import SwiftUI
 
 struct ContentView: View {
+    @AppStorage("currentUserEmail") private var currentUserEmail = ""
+
     var body: some View {
         NavigationStack {
-            WelcomeView()
+            if currentUserEmail.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                WelcomeView()
+            } else {
+                MainDashboardView()
+            }
         }
     }
 }

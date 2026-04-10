@@ -56,6 +56,7 @@ final class RegisterViewModel: ObservableObject {
             context.insert(nuevoUsuario)
             try context.save()
             UserDefaults.standard.set(normalizedEmail, forKey: "currentUserEmail")
+            UserDefaults.standard.set(normalizedUsername, forKey: "currentUsername")
 
             successMessage = "Usuario registrado correctamente."
 

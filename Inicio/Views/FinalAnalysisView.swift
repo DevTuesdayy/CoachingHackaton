@@ -15,6 +15,7 @@ struct FinalAnalysisView: View {
     @State private var selectedTab: AnalysisSection = .timeline
 
     let idioma: IdiomaPractica
+    let modoPitch: ModoPitch
     let contactoVisual: Int
     let muletillas: Int
     let textoUsuario: String
@@ -73,6 +74,7 @@ struct FinalAnalysisView: View {
             guard generadorReportes.analisisGenerado == nil, generadorReportes.mensajeError == nil else { return }
             await generadorReportes.generarReporte(
                 idioma: idioma,
+                modoPitch: modoPitch,
                 contactoVisual: contactoVisual,
                 muletillas: muletillas,
                 textoUsuario: textoUsuario,
@@ -109,6 +111,16 @@ extension FinalAnalysisView {
             Text("Análisis Final")
                 .font(.system(size: 24, weight: .bold))
                 .foregroundColor(primaryTextColor)
+
+            Spacer()
+
+            Text(modoPitch.displayName)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(themeManager.accentColor)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(themeManager.accentColor.opacity(0.12))
+                .clipShape(Capsule(style: .continuous))
         }
         .padding(.horizontal, 22)
         .padding(.top, 20)
@@ -277,7 +289,7 @@ extension FinalAnalysisView {
         [
             "Mantienes un contacto visual de \(contactoVisual)%, lo que da una buena base de presencia.",
             "Se detectaron \(muletillas) muletillas durante la sesión; conviene reducirlas para sonar más preciso.",
-            "Tu volumen promedio fue \(Int(volumenPromedio * 100))%, así que conviene mantener una proyección estable y clara."
+            "Tu volumen promedio fue \(Int(volumenPromedio * 100))%, así que conviene mantener una proyección estable y clara para un pitch de \(modoPitch.displayName.lowercased())."
         ]
     }
 
@@ -363,6 +375,7 @@ private struct InsightItem {
 #Preview {
     FinalAnalysisView(
         idioma: .espanol,
+        modoPitch: .startup,
         contactoVisual: 82,
         muletillas: 3,
         textoUsuario: "Quiero presentar una app que ayuda a practicar pitches con feedback en tiempo real.",

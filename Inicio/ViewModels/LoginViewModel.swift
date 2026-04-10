@@ -44,6 +44,7 @@ final class LoginViewModel: ObservableObject {
                 usuario.registrarIngreso()
                 try context.save()
                 UserDefaults.standard.set(usuario.email, forKey: "currentUserEmail")
+                UserDefaults.standard.set(usuario.username, forKey: "currentUsername")
                 successMessage = "Inicio de sesión correcto."
             } else {
                 errorMessage = "Correo o contraseña incorrectos."
