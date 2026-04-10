@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct SubscriptionView: View {
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
 
     var body: some View {
@@ -19,9 +20,26 @@ struct SubscriptionView: View {
                     
                     // --- HEADER ---
                     HStack {
+                        Button {
+                            dismiss()
+                        } label: {
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 16, weight: .bold))
+                                .foregroundColor(themeManager.primaryTextColor)
+                                .frame(width: 40, height: 40)
+                                .background(themeManager.cardColor)
+                                .clipShape(Circle())
+                                .overlay(
+                                    Circle()
+                                        .stroke(themeManager.borderColor, lineWidth: 1)
+                                )
+                        }
+                        .buttonStyle(.plain)
+
                         Text("Planes")
                             .font(.headline)
                             .foregroundColor(themeManager.primaryTextColor)
+
                         Spacer()
                     }
                     .padding(.horizontal)

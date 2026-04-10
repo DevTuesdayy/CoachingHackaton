@@ -19,6 +19,7 @@ struct ProfileView: View {
     @Environment(\.modelContext) private var context
     @EnvironmentObject private var themeManager: ThemeManager
     @StateObject private var viewModel = ProfileViewModel()
+    @State private var showSubscriptionView = false
     
     var body: some View {
         ZStack {
@@ -68,17 +69,22 @@ struct ProfileView: View {
                                 .foregroundColor(themeManager.secondaryTextColor)
                         }
                         
-                        HStack(spacing: 8) {
-                            Image(systemName: "creditcard.fill")
-                                .font(.caption)
-                            Text(viewModel.planName)
-                                .font(.system(size: 14, weight: .bold))
+                        Button {
+                            showSubscriptionView = true
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "creditcard.fill")
+                                    .font(.caption)
+                                Text(viewModel.planName)
+                                    .font(.system(size: 14, weight: .bold))
+                            }
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 20)
+                            .padding(.vertical, 10)
+                            .background(themeManager.accentGradient)
+                            .cornerRadius(20)
                         }
-                        .foregroundColor(.white)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 10)
-                        .background(themeManager.accentGradient)
-                        .cornerRadius(20)
+                        .buttonStyle(.plain)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 30)
@@ -147,6 +153,9 @@ struct ProfileView: View {
         }
         .onAppear {
             viewModel.loadCurrentUser(context: context)
+        }
+        .navigationDestination(isPresented: $showSubscriptionView) {
+            SubscriptionView()
         }
         .navigationBarBackButtonHidden(true)
         .toolbar(.hidden, for: .navigationBar)
