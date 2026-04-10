@@ -79,7 +79,10 @@ final class MainDashboardViewModel: ObservableObject {
             duracionSegundos: reporte.duracionSegundos,
             volumenPromedio: reporte.volumenPromedio
         )
-        let temaPrincipal = await GeneradorReportes.analizarTema(textoUsuario: reporte.textoUsuario)
+        let temaPrincipal = await GeneradorReportes.analizarTema(
+            textoUsuario: reporte.textoUsuario,
+            idioma: reporte.idioma
+        )
         let sesion = SesionPractica(
             userEmail: currentEmail,
             duracionSegundos: reporte.duracionSegundos,

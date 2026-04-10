@@ -40,6 +40,7 @@ final class GeneradorReportes: ObservableObject {
     @Published var mensajeError: String?
 
     func generarReporte(
+        idioma: IdiomaPractica,
         contactoVisual: Int,
         muletillas: Int,
         textoUsuario: String,
@@ -53,7 +54,7 @@ final class GeneradorReportes: ObservableObject {
         let instrucciones = """
         Eres 'PitchCoach', un coach ejecutivo estricto pero constructivo.
         Analiza las métricas y la transcripción del usuario.
-        Responde en español con una estructura coherente y realista.
+        Responde en \(idioma == .espanol ? "español" : "inglés") con una estructura coherente y realista.
         Genera exactamente 3 insights breves.
         Genera exactamente 6 puntos para timelineChart distribuidos entre 0:00 y la duracion real de la sesion.
         Genera exactamente 3 eventos para timelineEvents con momentos importantes del pitch.
@@ -85,16 +86,17 @@ final class GeneradorReportes: ObservableObject {
         estaGenerando = false
     }
 
-    static func analizarTema(textoUsuario: String) async -> String {
+    static func analizarTema(textoUsuario: String, idioma: IdiomaPractica) async -> String {
         let textoLimpio = textoUsuario.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !textoLimpio.isEmpty, textoLimpio != "Escuchando..." else {
-            return "Práctica general"
+        let listeningPlaceholder = idioma.listeningPlaceholder
+        guard !textoLimpio.isEmpty, textoLimpio != listeningPlaceholder else {
+            return idioma == .espanol ? "Práctica general" : "General practice"
         }
 
         let instrucciones = """
-        Identifica el tema principal de un speech o pitch.
-        Devuelve un tema breve en español, de entre 2 y 5 palabras.
-        Debe ser una categoria o asunto claro, no una frase larga.
+        Identify the main topic of a speech or pitch.
+        Return a short topic in \(idioma == .espanol ? "Spanish" : "English"), between 2 and 5 words.
+        It must be a clear category or subject, not a long sentence.
         """
 
         do {
@@ -104,19 +106,23 @@ final class GeneradorReportes: ObservableObject {
                 generating: TemaSesionIA.self
             )
             let tema = respuesta.content.tema.trimmingCharacters(in: .whitespacesAndNewlines)
-            return tema.isEmpty ? fallbackTema(from: textoLimpio) : tema
+            return tema.isEmpty ? fallbackTema(from: textoLimpio, idioma: idioma) : tema
         } catch {
-            return fallbackTema(from: textoLimpio)
+            return fallbackTema(from: textoLimpio, idioma: idioma)
         }
     }
 
-    private static func fallbackTema(from texto: String) -> String {
+    private static func fallbackTema(from texto: String, idioma: IdiomaPractica) -> String {
         let palabras = texto
             .components(separatedBy: CharacterSet.whitespacesAndNewlines.union(.punctuationCharacters))
             .filter { !$0.isEmpty }
             .prefix(4)
 
         let candidato = palabras.joined(separator: " ").trimmingCharacters(in: .whitespacesAndNewlines)
-        return candidato.isEmpty ? "Práctica general" : candidato
+        if !candidato.isEmpty {
+            return candidato
+        }
+
+        return idioma == .espanol ? "Práctica general" : "General practice"
     }
 }

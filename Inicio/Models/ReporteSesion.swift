@@ -9,6 +9,7 @@ import Foundation
 
 struct ReporteSesion: Identifiable {
     let id = UUID()
+    let idioma: IdiomaPractica
     let contactoVisual: Int
     let muletillas: Int
     let textoUsuario: String

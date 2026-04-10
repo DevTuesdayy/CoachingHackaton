@@ -47,6 +47,7 @@ struct MainDashboardView: View {
         }
         .fullScreenCover(item: $reporteSesion) { reporte in
             FinalAnalysisView(
+                idioma: reporte.idioma,
                 contactoVisual: reporte.contactoVisual,
                 muletillas: reporte.muletillas,
                 textoUsuario: reporte.textoUsuario,
@@ -185,6 +186,8 @@ extension MainDashboardView {
             Text("IA lista para analizar tu pitch")
                 .font(.subheadline)
                 .foregroundColor(themeManager.secondaryTextColor)
+
+            languageSelector
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 35)
@@ -210,6 +213,30 @@ extension MainDashboardView {
         .onTapGesture {
             mostrarPracticaEnVivo = true
         }
+    }
+
+    private var languageSelector: some View {
+        HStack(spacing: 10) {
+            ForEach(IdiomaPractica.allCases) { idioma in
+                let isSelected = entrenadorVoz.idiomaSeleccionado == idioma
+
+                Button {
+                    entrenadorVoz.configurarIdioma(idioma)
+                } label: {
+                    Text(idioma.displayName)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(isSelected ? .white : themeManager.secondaryTextColor)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 9)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(isSelected ? themeManager.accentColor : themeManager.elevatedCardColor)
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.top, 4)
     }
 
     private var statsSection: some View {

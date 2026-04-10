@@ -14,6 +14,7 @@ struct FinalAnalysisView: View {
 
     @State private var selectedTab: AnalysisSection = .timeline
 
+    let idioma: IdiomaPractica
     let contactoVisual: Int
     let muletillas: Int
     let textoUsuario: String
@@ -71,6 +72,7 @@ struct FinalAnalysisView: View {
         .task {
             guard generadorReportes.analisisGenerado == nil, generadorReportes.mensajeError == nil else { return }
             await generadorReportes.generarReporte(
+                idioma: idioma,
                 contactoVisual: contactoVisual,
                 muletillas: muletillas,
                 textoUsuario: textoUsuario,
@@ -360,6 +362,7 @@ private struct InsightItem {
 
 #Preview {
     FinalAnalysisView(
+        idioma: .espanol,
         contactoVisual: 82,
         muletillas: 3,
         textoUsuario: "Quiero presentar una app que ayuda a practicar pitches con feedback en tiempo real.",

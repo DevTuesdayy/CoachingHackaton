@@ -152,6 +152,7 @@ struct VistaPracticaEnVivo: View {
         estaGrabando = false
 
         let reporte = ReporteSesion(
+            idioma: entrenadorVoz.idiomaSeleccionado,
             contactoVisual: analisisFacial.contactoVisual,
             muletillas: entrenadorVoz.contadorMuletillas,
             textoUsuario: entrenadorVoz.textoEscuchado,

@@ -11,13 +11,64 @@ import Combine
 import Speech
 import AVFoundation
 
+enum IdiomaPractica: String, CaseIterable, Identifiable, Codable {
+    case espanol
+    case ingles
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .espanol:
+            "Español"
+        case .ingles:
+            "English"
+        }
+    }
+
+    var localeIdentifier: String {
+        switch self {
+        case .espanol:
+            "es-MX"
+        case .ingles:
+            "en-US"
+        }
+    }
+
+    var fillerWords: [String] {
+        switch self {
+        case .espanol:
+            [
+                "este", "eh", "bueno", "osea", "básicamente",
+                "pues", "digamos", "tipo", "entonces", "digo",
+                "literalmente", "obviamente", "mmm", "ah", "claro"
+            ]
+        case .ingles:
+            [
+                "um", "uh", "like", "so", "well",
+                "you know", "actually", "basically", "literally", "okay"
+            ]
+        }
+    }
+
+    var listeningPlaceholder: String {
+        switch self {
+        case .espanol:
+            "Escuchando..."
+        case .ingles:
+            "Listening..."
+        }
+    }
+}
+
 class EntrenadorDeVoz: ObservableObject {
     @Published var textoEscuchado = "Presiona iniciar y comienza a hablar..."
     @Published var contadorMuletillas = 0
     @Published var nivelVolumenActual: Double = 0
     @Published var volumenPromedio: Double = 0
+    @Published var idiomaSeleccionado: IdiomaPractica = .espanol
     
-    private var reconocedor = SFSpeechRecognizer(locale: Locale(identifier: "es-MX"))
+    private var reconocedor = SFSpeechRecognizer(locale: Locale(identifier: IdiomaPractica.espanol.localeIdentifier))
     private var solicitudReconocimiento: SFSpeechAudioBufferRecognitionRequest?
     private var tareaReconocimiento: SFSpeechRecognitionTask?
     private let motorDeAudio = AVAudioEngine()
@@ -26,18 +77,13 @@ class EntrenadorDeVoz: ObservableObject {
     private var muestrasVolumen: Int = 0
     private var muestrasVolumenActivas: Int = 0
     
-    // lista de mulettilas
-    private let muletillas = [
-        "este", "eh", "bueno", "osea", "básicamente",
-        "pues", "digamos", "tipo", "entonces", "digo",
-        "literalmente", "obviamente", "mmm", "ah", "claro"
-    ]
     
     func iniciarGrabacion() {
         detenerGrabacion()
+        reconocedor = SFSpeechRecognizer(locale: Locale(identifier: idiomaSeleccionado.localeIdentifier))
 
         contadorMuletillas = 0
-        textoEscuchado = "Escuchando..."
+        textoEscuchado = idiomaSeleccionado.listeningPlaceholder
         nivelVolumenActual = 0
         volumenPromedio = 0
         sumaVolumen = 0
@@ -98,6 +144,13 @@ class EntrenadorDeVoz: ObservableObject {
             detenerGrabacion()
         }
     }
+
+    func configurarIdioma(_ idioma: IdiomaPractica) {
+        guard !motorDeAudio.isRunning else { return }
+        idiomaSeleccionado = idioma
+        reconocedor = SFSpeechRecognizer(locale: Locale(identifier: idioma.localeIdentifier))
+        textoEscuchado = "Presiona iniciar y comienza a hablar..."
+    }
     
     func detenerGrabacion() {
         temporizadorSimulado?.invalidate()
@@ -117,17 +170,33 @@ class EntrenadorDeVoz: ObservableObject {
     }
 
     private func iniciarSimulacion() {
-        let muestras = [
-                    "Hola, este, quiero presentar mi idea de negocio para el hackathon.",
-                    "Bueno, basicamente la app ayuda a los profesionales a practicar pitches.",
-                    "Osea, te escucha en tiempo real y, pues, marca cada muletilla.",
-                    "Eh, con esto digamos que puedes mejorar tu forma de hablar bajo presión.",
-                    "Entonces, nuestro modelo de negocio es, mmm, un modelo freemium corporativo.",
-                    "Literalmente puedes usarla sin internet, lo cual es una gran ventaja técnica.",
-                    "Digo, actualmente pagar un coach es súper caro y poco accesible.",
-                    "Ah, y la cámara analiza tu contacto visual, tipo, totalmente en vivo.",
-                    "Pues, esperamos que les guste, este, nuestra propuesta de PitchCoach."
-                ]
+        let muestras: [String]
+        switch idiomaSeleccionado {
+        case .espanol:
+            muestras = [
+                "Hola, este, quiero presentar mi idea de negocio para el hackathon.",
+                "Bueno, basicamente la app ayuda a los profesionales a practicar pitches.",
+                "Osea, te escucha en tiempo real y, pues, marca cada muletilla.",
+                "Eh, con esto digamos que puedes mejorar tu forma de hablar bajo presión.",
+                "Entonces, nuestro modelo de negocio es, mmm, un modelo freemium corporativo.",
+                "Literalmente puedes usarla sin internet, lo cual es una gran ventaja técnica.",
+                "Digo, actualmente pagar un coach es súper caro y poco accesible.",
+                "Ah, y la cámara analiza tu contacto visual, tipo, totalmente en vivo.",
+                "Pues, esperamos que les guste, este, nuestra propuesta de PitchCoach."
+            ]
+        case .ingles:
+            muestras = [
+                "Hi, um, I want to present my startup idea for the hackathon.",
+                "Well, basically the app helps professionals practice their pitches.",
+                "Like, it listens in real time and marks each filler word.",
+                "Uh, with this you can improve how you speak under pressure.",
+                "So, our business model is, um, a corporate freemium plan.",
+                "Literally, you can use it offline, which is a major technical advantage.",
+                "Actually, hiring a speaking coach is expensive and not always accessible.",
+                "And the camera analyzes your eye contact, like, completely live.",
+                "So, we hope you enjoy our PitchCoach proposal."
+            ]
+        }
 
         var indice = 0
         textoEscuchado = muestras[0]
@@ -155,7 +224,7 @@ class EntrenadorDeVoz: ObservableObject {
     }
     
     private func contarMuletillas(en texto: String) {
-        let muletillasNormalizadas = Set(muletillas.map(normalizar))
+        let muletillasNormalizadas = Set(idiomaSeleccionado.fillerWords.map(normalizar))
         let palabras = texto
             .components(separatedBy: CharacterSet.letters.inverted)
             .map(normalizar)
@@ -166,7 +235,7 @@ class EntrenadorDeVoz: ObservableObject {
 
     private func normalizar(_ texto: String) -> String {
         texto
-            .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: "es-MX"))
+            .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: Locale(identifier: idiomaSeleccionado.localeIdentifier))
             .trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
