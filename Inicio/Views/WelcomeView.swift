@@ -36,13 +36,12 @@ struct WelcomeView: View {
                         .frame(width: 140, height: 140)
                         .blur(radius: 20)
                     
-                    Circle()
-                        .fill(themeManager.accentGradient)
-                        .frame(width: 100, height: 100)
-                    
-                    Image(systemName: "mic.fill")
-                        .font(.system(size: 50))
-                        .foregroundColor(.white)
+                    Image("icono")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 112, height: 112)
+                        .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                        .shadow(color: themeManager.accentColor.opacity(0.22), radius: 16, y: 8)
                 }
                 
                 VStack(spacing: 8) {

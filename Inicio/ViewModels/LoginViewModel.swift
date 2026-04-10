@@ -21,8 +21,11 @@ final class LoginViewModel: ObservableObject {
         errorMessage = ""
         successMessage = ""
 
-        if email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            || password.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let normalizedEmail = normalized(email)
+        let normalizedPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if normalizedEmail.isEmpty
+            || normalizedPassword.isEmpty
         {
             errorMessage = "Ingresa tu email y contraseña."
             return
@@ -32,11 +35,12 @@ final class LoginViewModel: ObservableObject {
             let usuarios = try context.fetch(FetchDescriptor<Usuario>())
 
             let usuario = usuarios.first {
-                $0.email.lowercased() == email.lowercased()
-                    && $0.password == password
+                normalized($0.email) == normalizedEmail
+                    && $0.password == normalizedPassword
             }
 
             if let usuario {
+                usuario.email = normalized(usuario.email)
                 usuario.registrarIngreso()
                 try context.save()
                 UserDefaults.standard.set(usuario.email, forKey: "currentUserEmail")
@@ -47,5 +51,11 @@ final class LoginViewModel: ObservableObject {
         } catch {
             errorMessage = "No se pudo iniciar sesión."
         }
+    }
+
+    private func normalized(_ email: String) -> String {
+        email
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
     }
 }

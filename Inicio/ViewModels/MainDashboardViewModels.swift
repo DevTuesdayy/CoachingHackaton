@@ -23,7 +23,7 @@ final class MainDashboardViewModel: ObservableObject {
     @Published var contactoVisualResumen: Int = 0
 
     func loadCurrentUser(context: ModelContext) {
-        guard let currentEmail = UserDefaults.standard.string(forKey: "currentUserEmail") else {
+        guard let storedEmail = UserDefaults.standard.string(forKey: "currentUserEmail") else {
             username = "Usuario"
             totalSesiones = 0
             ultimoScorePromedio = 0
@@ -33,22 +33,24 @@ final class MainDashboardViewModel: ObservableObject {
             return
         }
 
+        let currentEmail = normalized(storedEmail)
+
         do {
             let usuarios = try context.fetch(FetchDescriptor<Usuario>())
             let sesionesDescriptor = FetchDescriptor<SesionPractica>(
-                predicate: #Predicate<SesionPractica> { sesion in
-                    sesion.userEmail == currentEmail
-                },
                 sortBy: [SortDescriptor(\.fecha, order: .reverse)]
             )
-            let sesiones = try context.fetch(sesionesDescriptor)
+            let sesiones = try context.fetch(sesionesDescriptor).filter {
+                normalized($0.userEmail) == currentEmail
+            }
 
             if let usuario = usuarios.first(where: {
-                $0.email.lowercased() == currentEmail.lowercased()
+                normalized($0.email) == currentEmail
             }) {
                 username = usuario.username
                 rachaActual = usuario.rachaActual
                 mejorRacha = usuario.mejorRacha
+                UserDefaults.standard.set(normalized(usuario.email), forKey: "currentUserEmail")
             } else {
                 username = "Usuario"
                 rachaActual = 0
@@ -69,9 +71,11 @@ final class MainDashboardViewModel: ObservableObject {
     }
 
     func registrarSesion(reporte: ReporteSesion, context: ModelContext) async {
-        guard let currentEmail = UserDefaults.standard.string(forKey: "currentUserEmail") else {
+        guard let storedEmail = UserDefaults.standard.string(forKey: "currentUserEmail") else {
             return
         }
+
+        let currentEmail = normalized(storedEmail)
 
         let score = ReporteSesion.calcularScore(
             contactoVisual: reporte.contactoVisual,
@@ -129,5 +133,11 @@ final class MainDashboardViewModel: ObservableObject {
         let muletillasPorMinuto = Double(muletillas) / duracionMinutos
         let score = max(0.0, 100.0 - (muletillasPorMinuto * 7.5))
         return Int(round(max(0.0, min(100.0, score))))
+    }
+
+    private func normalized(_ email: String) -> String {
+        email
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
     }
 }

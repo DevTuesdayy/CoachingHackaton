@@ -13,14 +13,16 @@ struct AuthHeaderView: View {
     var body: some View {
         VStack(spacing: 15) {
             ZStack {
-                RoundedRectangle(cornerRadius: 25)
-                    .fill(themeManager.accentGradient)
-                    .frame(width: 80, height: 80)
-                    .shadow(color: themeManager.accentSecondaryColor.opacity(0.5), radius: 20)
+                RoundedRectangle(cornerRadius: 25, style: .continuous)
+                    .fill(themeManager.accentGradient.opacity(0.18))
+                    .frame(width: 90, height: 90)
+                    .shadow(color: themeManager.accentSecondaryColor.opacity(0.35), radius: 20)
 
-                Image(systemName: "mic.fill")
-                    .font(.system(size: 40))
-                    .foregroundColor(.white)
+                Image("icono")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 78, height: 78)
+                    .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
             }
 
             Text("PitchCoach")

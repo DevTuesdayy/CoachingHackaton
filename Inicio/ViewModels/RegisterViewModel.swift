@@ -22,9 +22,13 @@ final class RegisterViewModel: ObservableObject {
         errorMessage = ""
         successMessage = ""
 
-        if username.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            || email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            || password.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        let normalizedUsername = username.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedEmail = normalized(email)
+        let normalizedPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if normalizedUsername.isEmpty
+            || normalizedEmail.isEmpty
+            || normalizedPassword.isEmpty
         {
             errorMessage = "Completa todos los campos."
             return
@@ -34,7 +38,7 @@ final class RegisterViewModel: ObservableObject {
             let usuarios = try context.fetch(FetchDescriptor<Usuario>())
 
             let existe = usuarios.contains {
-                $0.email.lowercased() == email.lowercased()
+                normalized($0.email) == normalizedEmail
             }
 
             if existe {
@@ -43,15 +47,15 @@ final class RegisterViewModel: ObservableObject {
             }
 
             let nuevoUsuario = Usuario(
-                username: username,
-                email: email,
-                password: password
+                username: normalizedUsername,
+                email: normalizedEmail,
+                password: normalizedPassword
             )
             nuevoUsuario.registrarIngreso()
 
             context.insert(nuevoUsuario)
             try context.save()
-            UserDefaults.standard.set(email, forKey: "currentUserEmail")
+            UserDefaults.standard.set(normalizedEmail, forKey: "currentUserEmail")
 
             successMessage = "Usuario registrado correctamente."
 
@@ -61,5 +65,11 @@ final class RegisterViewModel: ObservableObject {
         } catch {
             errorMessage = "No se pudo registrar el usuario."
         }
+    }
+
+    private func normalized(_ email: String) -> String {
+        email
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
     }
 }

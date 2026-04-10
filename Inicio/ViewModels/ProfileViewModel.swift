@@ -19,7 +19,7 @@ final class ProfileViewModel: ObservableObject {
     @Published var claridadPromedio: Int = 0
     
     func loadCurrentUser(context: ModelContext) {
-        guard let currentEmail = UserDefaults.standard.string(forKey: "currentUserEmail") else {
+        guard let storedEmail = UserDefaults.standard.string(forKey: "currentUserEmail") else {
             username = "Usuario"
             email = "correo@ejemplo.com"
             totalSesiones = 0
@@ -27,19 +27,20 @@ final class ProfileViewModel: ObservableObject {
             claridadPromedio = 0
             return
         }
+
+        let currentEmail = normalized(storedEmail)
         
         do {
             let usuarios = try context.fetch(FetchDescriptor<Usuario>())
             let sesionesDescriptor = FetchDescriptor<SesionPractica>(
-                predicate: #Predicate<SesionPractica> { sesion in
-                    sesion.userEmail == currentEmail
-                },
                 sortBy: [SortDescriptor(\.fecha, order: .reverse)]
             )
-            let sesiones = try context.fetch(sesionesDescriptor)
+            let sesiones = try context.fetch(sesionesDescriptor).filter {
+                normalized($0.userEmail) == currentEmail
+            }
             
             if let usuario = usuarios.first(where: {
-                $0.email.lowercased() == currentEmail.lowercased()
+                normalized($0.email) == currentEmail
             }) {
                 username = usuario.username
                 email = usuario.email
@@ -60,5 +61,11 @@ final class ProfileViewModel: ObservableObject {
             mejorScore = 0
             claridadPromedio = 0
         }
+    }
+
+    private func normalized(_ email: String) -> String {
+        email
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
     }
 }

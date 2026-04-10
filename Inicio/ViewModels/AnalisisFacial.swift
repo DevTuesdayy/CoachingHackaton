@@ -62,18 +62,22 @@ class AnalisisFacial: NSObject, ObservableObject, ARSessionDelegate {
         guard let faceAnchor = anchors.compactMap({ $0 as? ARFaceAnchor}).first else { return }
         
         let blendShapes = faceAnchor.blendShapes
+        let toleranciaPantalla: Float = 0.25
+
         let desvioArribaI = blendShapes[.eyeLookUpLeft]?.floatValue ?? 0
         let desvioAbajoI = blendShapes[.eyeLookDownLeft]?.floatValue ?? 0
+        let desvioAbajoIAjustado = max(0, desvioAbajoI - toleranciaPantalla)
         let desvioAdentroI = blendShapes[.eyeLookInLeft]?.floatValue ?? 0
         let desvioAfueraI = blendShapes[.eyeLookOutLeft]?.floatValue ?? 0
         
         let desvioArribaD = blendShapes[.eyeLookUpRight]?.floatValue ?? 0
         let desvioAbajoD = blendShapes[.eyeLookDownRight]?.floatValue ?? 0
+        let desvioAbajoDAjustado = max(0, desvioAbajoD - toleranciaPantalla)
         let desvioAdentroD = blendShapes[.eyeLookInRight]?.floatValue ?? 0
         let desvioAfueraD = blendShapes[.eyeLookOutRight]?.floatValue ?? 0
         
-        let maxDesvioI = max(desvioArribaI, desvioAbajoI, desvioAdentroI, desvioAfueraI)
-        let maxDesvioD = max(desvioArribaD, desvioAbajoD, desvioAdentroD, desvioAfueraD)
+        let maxDesvioI = max(desvioArribaI, desvioAbajoIAjustado, desvioAdentroI, desvioAfueraI)
+        let maxDesvioD = max(desvioArribaD, desvioAbajoDAjustado, desvioAdentroD, desvioAfueraD)
         
         let desvioPromedio = (maxDesvioI + maxDesvioD) / 2.0
         

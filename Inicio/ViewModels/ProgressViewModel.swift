@@ -37,19 +37,20 @@ final class ProgressViewModel: ObservableObject {
     @Published var claridadPromedio: Int = 0
 
     func loadProgress(context: ModelContext) {
-        guard let currentEmail = UserDefaults.standard.string(forKey: "currentUserEmail") else {
+        guard let storedEmail = UserDefaults.standard.string(forKey: "currentUserEmail") else {
             reset()
             return
         }
 
+        let currentEmail = normalized(storedEmail)
+
         do {
             let descriptor = FetchDescriptor<SesionPractica>(
-                predicate: #Predicate<SesionPractica> { sesion in
-                    sesion.userEmail == currentEmail
-                },
                 sortBy: [SortDescriptor(\.fecha, order: .reverse)]
             )
-            let sesiones = try context.fetch(descriptor)
+            let sesiones = try context.fetch(descriptor).filter {
+                normalized($0.userEmail) == currentEmail
+            }
             apply(sesiones)
         } catch {
             reset()
@@ -146,5 +147,11 @@ final class ProgressViewModel: ObservableObject {
 
     private func formattedDuration(seconds: Int) -> String {
         String(format: "%d:%02d", seconds / 60, seconds % 60)
+    }
+
+    private func normalized(_ email: String) -> String {
+        email
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
     }
 }
